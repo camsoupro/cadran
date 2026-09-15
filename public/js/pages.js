@@ -852,7 +852,7 @@ const RECIPES = [
   },
   {
     match: ["vendu", "sold", "kg au", "kg to"],
-    credit: true,
+    credit: "customer",
     fr: "vendu 12 kg au Café des Artisans", en: "sold 12 kg to Cafe des Artisans",
     event: ["Vente à crédit, centre GRO", "Credit sale, centre GRO"],
     rule: ["Vente de produits finis, TVA 5,5 %, puis sortie de stock au coût standard",
@@ -866,6 +866,7 @@ const RECIPES = [
   },
   {
     match: ["acheté", "bought", "café vert", "green coffee", "lot"],
+    credit: "supplier",
     fr: "acheté 600 kg de café vert du Brésil à 5,20 le kilo",
     en: "bought 600 kg of Brazilian green coffee at 5.20 a kilo",
     event: ["Achat de matière première, centre TOR", "Raw material purchase, centre TOR"],
@@ -880,6 +881,7 @@ const RECIPES = [
   },
   {
     match: ["loyer", "rent"],
+    settle: "cash",
     fr: "payé le loyer de la boutique, 2 150", en: "paid the shop rent, 2 150",
     event: ["Charge externe, centre BTQ", "External charge, centre BTQ"],
     rule: ["Loyer en 613, TVA déductible, paiement par banque",
@@ -891,6 +893,7 @@ const RECIPES = [
   },
   {
     match: ["torréfié", "roasted", "brassin", "batch"],
+    settle: "internal",
     fr: "torréfié un brassin de 220 kg de vert", en: "roasted a batch of 220 kg of green",
     event: ["Production, centre TOR", "Production, centre TOR"],
     rule: ["Sortie du vert au premier entré premier sorti, entrée du torréfié au coût standard",
@@ -904,6 +907,7 @@ const RECIPES = [
   },
   {
     match: ["salaire", "paie", "payroll", "wages"],
+    settle: "liability",
     fr: "passé la paie du mois", en: "posted this month's payroll",
     event: ["Paie, tous centres", "Payroll, every centre"],
     rule: ["Brut en 641 par centre, charges patronales en 645, net et cotisations au passif",
@@ -943,8 +947,6 @@ function record(D, go) {
       due: "<b>" + date(dueDate(when.value, termsSel.value), true) + "</b>",
     });
   };
-  when.addEventListener("change", refreshDue);
-  termsSel.addEventListener("change", refreshDue);
 
   // une date ecrite dans la phrase gagne sur le champ: 14/09, 14-09, le 14 septembre
   const MONTHS = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout",
@@ -961,7 +963,16 @@ function record(D, go) {
     return null;
   };
 
+  // Comment l'operation se denoue : tout de suite, plus tard, ou jamais.
+  const SETTLE = { cash: "rPaidNow", liability: "rSettleLiability", internal: "rSettleInternal" };
+
+  // On ne pose une question que lorsque sa reponse change quelque chose. Un delai de
+  // paiement sur un loyer paye par virement n'a pas de sens, et un delai sur un
+  // rendez-vous de plombier en a encore moins.
+  let current = null, fromText = false;
+
   const show = recipe => {
+    current = recipe;
     result.hidden = false;
     result.innerHTML = "";
     if (!recipe) {
@@ -970,19 +981,41 @@ function record(D, go) {
     }
     const td = recipe.lines.reduce((s2, l) => s2 + l[2], 0);
     const tc = recipe.lines.reduce((s2, l) => s2 + l[3], 0);
-    const credit = recipe.credit === true;
-    // append transforme une valeur nulle en texte "null" : on filtre avant
+    const credit = recipe.credit === "customer" || recipe.credit === "supplier";
+    const posts = recipe.lines.length > 0;
+
+    // le bloc du delai n'existe que pour une operation a credit
+    const termsBlock = credit
+      ? h("div", { class: "terms-block" },
+          h("div", { class: "filters", style: { margin: 0 } },
+            h("span", { class: "caps",
+              text: t(recipe.credit === "supplier" ? "rTermsSupplier" : "rTermsCustomer") }),
+            termsSel),
+          dueLine)
+      : null;
+
     const parts = [
       h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("rUnderstood") }),
       h("div", { class: "chips", style: { marginTop: 0 } },
-        h("span", { class: "chip" }, t("cDate"), " ", h("b", { text: date(when.value, true) })),
+        h("span", { class: "chip" }, t("cDate"), " ", h("b", { text: date(when.value, true) }),
+          fromText ? h("small", { class: "from-text", text: t("rDateFromText") }) : null),
         h("span", { class: "chip" }, t("rEvent"), " ", h("b", { text: pick(recipe.event[0], recipe.event[1]) })),
-        credit ? h("span", { class: "chip" }, t("cDue"), " ",
-          h("b", { text: date(dueDate(when.value, termsSel.value), true) })) : null,
+        credit
+          ? h("span", { class: "chip" }, t("cDue"), " ",
+              h("b", { text: date(dueDate(when.value, termsSel.value), true) }))
+          : posts && SETTLE[recipe.settle]
+            ? h("span", { class: "chip" }, h("b", { text: t(SETTLE[recipe.settle]) }))
+            : null,
         h("span", { class: "chip" }, t("rRule"), " ", h("b", { text: pick(recipe.rule[0], recipe.rule[1]) }))),
-      recipe.lines.length ? h("p", { class: "caps", style: { margin: "22px 0 10px" }, text: t("rProposed") }) : null,
-      !recipe.lines.length
-        ? h("p", { class: "reading", style: { marginTop: "18px" }, html: pick(recipe.note[0], recipe.note[1]) })
+      termsBlock,
+      posts ? h("p", { class: "caps", style: { margin: "22px 0 10px" }, text: t("rProposed") }) : null,
+      !posts
+        ? h("div", { class: "no-entry" },
+            h("p", { class: "caps", style: { margin: "0 0 8px" }, text: t("rNoEntry") }),
+            h("p", { class: "reading", style: { margin: 0 }, text: t("rNoEntryWhy") }),
+            h("p", { class: "reading", style: { margin: "12px 0 0" }, html: pick(recipe.note[0], recipe.note[1]) }),
+            h("a", { class: "btn", href: "#/activity", style: { marginTop: "14px", display: "inline-block" },
+              text: t("rSeeActivity") }))
         : table([
         { label: t("cAccount"), c: true, render: l => l[0] },
         { label: t("cLabel"), render: l => l[1] },
@@ -995,17 +1028,21 @@ function record(D, go) {
       h("p", { class: "readonly" }, badge(t("readOnly")), t("rNotSaved")),
     ];
     result.append(...parts.filter(Boolean));
+    if (credit) refreshDue();
   };
 
   const run = () => {
     const q = input.value.toLowerCase();
     const found = readDate(input.value);
-    if (found && found >= "2026-01-01" && found <= "2026-09-30") {
-      when.value = found;
-      refreshDue();
-    }
+    fromText = Boolean(found && found >= "2026-01-01" && found <= "2026-09-30");
+    if (fromText) when.value = found;
     show(RECIPES.find(r => r.match.some(mm => q.includes(mm))) || null);
   };
+
+  // changer la date ou le delai apres coup recalcule le resultat affiche
+  const replay = () => { if (current) show(current); };
+  when.addEventListener("change", () => { fromText = false; replay(); });
+  termsSel.addEventListener("change", replay);
 
   const examples = h("div", { class: "examples" }, RECIPES.map(r =>
     h("button", {
@@ -1019,9 +1056,8 @@ function record(D, go) {
       h("div", { class: "prompt" }, input,
         h("button", { class: "btn primary", text: t("rTry"), onclick: run })),
       h("div", { class: "filters", style: { margin: "16px 0 0" } },
-        h("span", { class: "caps", text: t("rWhen") }), when,
-        h("span", { class: "caps", style: { marginLeft: "10px" }, text: t("rTermsField") }), termsSel),
-      dueLine,
+        h("span", { class: "caps", text: t("rWhen") }), when),
+      h("p", { class: "muted", style: { margin: "8px 0 0", fontSize: "12px" }, text: t("rWhenHint") }),
       h("p", { class: "muted", style: { margin: "16px 0 0", fontSize: "12px" }, text: t("rExamples") }),
       examples, result),
     h("p", { class: "reading", style: { marginTop: "22px" }, text: t("rDemoNote") }),

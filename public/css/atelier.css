@@ -381,3 +381,13 @@ tr.head-row td{padding-top:20px; font-family:var(--serif); font-size:15px}
 .btn.bell:hover{background:var(--neg-soft); color:var(--neg)}
 .filters .caps{white-space:nowrap}
 .filters input[type=number]{max-width:110px}
+
+/* ---------- saisie : les questions qui n'apparaissent qu'au bon moment ---------- */
+.terms-block{margin-top:18px; padding:16px 18px; border:1px solid var(--line);
+  border-left:2px solid var(--accent); background:var(--paper)}
+.terms-block .filters{margin:0}
+.terms-block p{margin:10px 0 0 !important}
+.no-entry{margin-top:18px; padding:18px 20px; border:1px solid var(--line);
+  border-left:2px solid var(--warn); background:var(--paper)}
+.chip small.from-text{display:inline; margin-left:8px; font-family:var(--mono);
+  font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}

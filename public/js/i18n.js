@@ -295,9 +295,25 @@ export const STR = {
   // ---------------------------------------------------------------- bac a sable, ajouts
   rWhen: ["Date de l'opération", "Date of the transaction"],
   rWhenNote: [
-    "Dans l'application réelle, le modèle lit la date dans votre phrase : lundi 14/09, hier, le 3 septembre. Ici, tapez-la dans le champ.",
-    "In the real application the model reads the date from your sentence: last Monday, yesterday, 3 September. Here, type it in the field."],
+    "Une comptabilité retient la date à laquelle la chose s'est passée, pas celle à laquelle vous la saisissez. C'est pour cela que le champ s'appelle date de l'opération. Le FEC distingue d'ailleurs les deux, la date d'écriture et la date de validation.",
+    "Bookkeeping records the date the thing happened, not the date you typed it in. That is why the field is called date of the transaction. The French legal export distinguishes the two as well, the entry date and the validation date."],
+  rWhenHint: [
+    "Le jour où la chose s'est passée. Vous pouvez aussi l'écrire dans votre phrase, comme vous le diriez à votre comptable : « lundi 14/09, acheté... »",
+    "The day the thing happened. You can also write it in your sentence, the way you would say it to your accountant: \"on Monday the 14th, bought...\""],
+  rDateFromText: ["Date lue dans votre phrase", "Date read from your sentence"],
   rTermsField: ["Délai accordé", "Terms granted"],
+  rTermsCustomer: ["Délai accordé au client", "Terms granted to the customer"],
+  rTermsSupplier: ["Délai obtenu du fournisseur", "Terms obtained from the supplier"],
+  rNoEntry: ["Ceci ne touche pas les comptes", "This does not touch the accounts"],
+  rNoEntryWhy: [
+    "Aucune date d'échéance, aucun délai de paiement, aucune écriture : il n'y a rien à payer et rien à comptabiliser. L'information est gardée dans le suivi des activités.",
+    "No due date, no payment terms, no entry: there is nothing to pay and nothing to post. The information is kept in the activity log."],
+  rSeeActivity: ["Voir le suivi des activités", "See the activity log"],
+  rPaidNow: ["Réglé immédiatement, aucune échéance", "Settled at once, no due date"],
+  rSettleLiability: [
+    "Dettes de paie et de cotisations, avec leurs échéances propres",
+    "Payroll and contribution liabilities, with their own statutory deadlines"],
+  rSettleInternal: ["Mouvement interne, aucun règlement", "Internal movement, nothing is settled"],
   rComputedDue: ["Échéance calculée", "Computed due date"],
   rDueExplain: [
     "Un délai de {terms} appliqué à une facture du {date} donne le {due}.",
