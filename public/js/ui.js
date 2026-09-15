@@ -135,7 +135,10 @@ export function countUp(el, target, render) {
     if (p < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
+  // Two safety nets: no frames at all, and frames that are throttled and stop half way
+  // (a background tab). Either way the real figure is what stays on screen.
   setTimeout(() => { if (!started) el.textContent = render(target); }, 600);
+  setTimeout(() => { el.textContent = render(target); }, dur + 400);
 }
 
 export function revealAll(root) {

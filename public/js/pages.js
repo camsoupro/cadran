@@ -751,7 +751,16 @@ function record(D) {
 // ============================================================== tutorial
 
 function tutorial(D, go) {
-  const p = D.production, i = D.income_statement, m = D.meta;
+  const p = D.production, i = D.income_statement, b = D.balance_sheet, m = D.meta;
+
+  // a small two column sheet: label on the left, figure on the right
+  const sheet = (rows) => h("div", { class: "ledger-mini", style: { gridTemplateColumns: "1fr 120px" } },
+    rows.map(r => [
+      h("span", { class: r.tot ? "tot" : "", style: r.muted ? { color: "var(--ink-3)" } : null },
+        r.label, r.note ? h("small", { style: { display: "block", color: "var(--ink-3)", fontSize: "10.5px" }, text: r.note }) : null),
+      h("span", { class: "n " + (r.tot ? "tot " : "") + (r.cls || ""), text: r.value }),
+    ]));
+
   const mini = () => h("div", { class: "ledger-mini" },
     h("span", { class: "h", text: t("cAccount") }), h("span", { class: "h", text: t("cLabel") }),
     h("span", { class: "h n", text: t("cDebit") }), h("span", { class: "h n", text: t("cCredit") }),
@@ -774,31 +783,76 @@ function tutorial(D, go) {
     ["7", pick("Produits", "Income"), pick("compte de résultat", "income statement")],
   ];
 
-  const step = (n, title, paras, demo) => h("div", { class: "step" },
+  const demo = (title, body) => h("div", { class: "demo" },
+    h("span", { class: "caps", text: title }), body);
+
+  const step = (title, paras, body, link) => h("div", { class: "step" },
     h("div", { class: "no" }),
-    h("div", {}, h("h3", { text: title }), paras.map(x => h("p", { html: x })), demo || null));
+    h("div", {}, h("h3", { text: title }), paras.map(x => h("p", { html: x })),
+      body || null,
+      link ? h("p", { style: { marginTop: "14px" } },
+        h("a", { class: "btn", href: "#/" + link[0], text: t("tuGoTo") + " : " + t(link[1]) })) : null));
+
+  // step 5, the standard cost taken apart
+  const d5 = demo(t("tuD5"), sheet([
+    { label: t("prGreenStd"), note: t("tuD5a", { p: money(p.std_green), y: num(p.std_yield * 100, 0) + " %" }),
+      value: num(p.std_green / p.std_yield) },
+    { label: t("prPack"), value: num(p.std_packaging) },
+    { label: t("prConversion"), value: num(p.std_conversion) },
+    { label: t("prStdCost"), value: num(p.std_cost), tot: true },
+  ]));
+
+  // step 6, the variance computed in front of the reader
+  const d6 = demo(t("tuD6"), sheet([
+    { label: t("tuD6a", { r: num(p.roasted_kg, 0) }), value: num(p.green_allowed, 0) + " kg" },
+    { label: t("tuD6b"), value: num(p.green_kg, 0) + " kg" },
+    { label: t("tuD6c", { p: money(p.std_green) }), value: num(p.excess_green, 0) + " kg" },
+    { label: t("prVarQty"), value: num(p.variance_qty), cls: "neg", tot: true },
+    { label: t("tuD6d", { used: num(p.green_kg, 0), avg: money(p.avg_green_price), std: money(p.std_green) }),
+      value: num(p.variance_price), cls: "neg", muted: true },
+    { label: t("prVarTotal"), value: num(p.variance), cls: "neg", tot: true },
+  ]));
+
+  // step 7, the result on both sides
+  const d7 = demo(t("tuD7"), sheet([
+    { label: t("tuD7a"), note: t("iNet"), value: num(i.net), cls: tone(i.net) },
+    { label: t("tuD7b"), note: t("bResult"), value: num(b.result), cls: tone(b.result) },
+    { label: t("tuD7c"), value: num(b.assets), tot: true },
+    { label: t("tuD7d"), value: num(b.total), tot: true },
+  ]));
+
+  // step 8, the FEC itself
+  const fecHead = "JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib|...|EcritureLib|Debit|Credit";
+  const fecRows = D.entries[0].lines.slice(0, 3).map(l => {
+    const a = D.accounts.find(x => x.num === l.account);
+    const d = D.entries[0].date.replace(/-/g, "");
+    return ["OD", "Operations diverses", D.entries[0].number, d, l.account, (a ? a.fr : "").slice(0, 26),
+      "...", l.label.slice(0, 26), l.debit.toFixed(2).replace(".", ","),
+      l.credit.toFixed(2).replace(".", ",")].join("|");
+  });
+  const d8 = demo(t("tuD8"),
+    h("div", { style: { overflowX: "auto" } },
+      h("pre", {
+        style: { margin: 0, fontFamily: "var(--mono)", fontSize: "10.5px", lineHeight: "2", whiteSpace: "pre" },
+        text: [fecHead, ...fecRows].join(String.fromCharCode(10)),
+      })));
 
   const steps = h("div", { class: "steps" },
-    step(1, t("tu1t"), [t("tu1a"), t("tu1b", { entries: num(m.entries, 0) })]),
-    step(2, t("tu2t"), [t("tu2a"), t("tu2b")],
-      h("div", { class: "demo" }, h("span", { class: "caps", text: pick("Vente au comptoir", "Counter sale") }), mini())),
-    step(3, t("tu3t"), [t("tu3a"), t("tu3b")],
-      h("div", { class: "demo" }, table([
-        { label: t("tClass"), c: true, render: r => r[0] },
-        { label: t("cLabel"), render: r => r[1] },
-        { label: "", render: r => h("span", { class: "muted", text: r[2] }) },
-      ], classes))),
-    step(4, t("tu4t"), [t("tu4a")],
-      h("div", { class: "demo" }, table([
-        { label: t("cJournal"), c: true, render: j => j.code },
-        { label: t("cLabel"), render: j => pick(j.fr, j.en) },
-        { label: pick("Écritures", "Entries"), n: true, render: j => num(j.count, 0) },
-      ], D.journals))),
-    step(5, t("tu5t"), [
-      t("tu5a", { cost: money(p.std_cost) }),
-      t("tu5b", { price: money(27.90) }),
-    ]),
-    step(6, t("tu6t"), [
+    step(t("tu1t"), [t("tu1a"), t("tu1b", { entries: num(m.entries, 0) })], null, ["", "pOverview"]),
+    step(t("tu2t"), [t("tu2a"), t("tu2b")], demo(t("tuD2"), mini()), ["journal", "pJournal"]),
+    step(t("tu3t"), [t("tu3a"), t("tu3b")], demo(t("tuD3"), table([
+      { label: t("tClass"), c: true, render: r => r[0] },
+      { label: t("cLabel"), render: r => r[1] },
+      { label: "", render: r => h("span", { class: "muted", text: r[2] }) },
+    ], classes)), ["trial", "pTrial"]),
+    step(t("tu4t"), [t("tu4a")], demo(t("tuD4"), table([
+      { label: t("cJournal"), c: true, render: j => j.code },
+      { label: t("cLabel"), render: j => pick(j.fr, j.en) },
+      { label: pick("Écritures", "Entries"), n: true, render: j => num(j.count, 0) },
+    ], D.journals)), ["ledger", "pLedger"]),
+    step(t("tu5t"), [t("tu5a", { cost: money(p.std_cost) }), t("tu5b", { price: money(27.90) })],
+      d5, ["inventory", "pInventory"]),
+    step(t("tu6t"), [
       t("tu6a", {
         std: num(p.std_yield * 100, 0), real: num(p.yield * 100, 1),
         roasted: num(p.roasted_kg, 0), allowed: num(p.green_allowed, 0),
@@ -809,9 +863,9 @@ function tutorial(D, go) {
         price: money(p.variance_price), total: money(p.variance),
         loss: money(Math.abs(i.net)),
       }),
-    ]),
-    step(7, t("tu7t"), [t("tu7a"), t("tu7b")]),
-    step(8, t("tu8t"), [t("tu8a"), t("tu8b", { lines: num(m.lines, 0) })]));
+    ], d6, ["production", "pProduction"]),
+    step(t("tu7t"), [t("tu7a"), t("tu7b")], d7, ["income", "pIncome"]),
+    step(t("tu8t"), [t("tu8a"), t("tu8b", { lines: num(m.lines, 0) })], d8, ["exports", "pExports"]));
 
   return {
     node: h("div", {},
