@@ -602,7 +602,7 @@ function invoiceStatus(D, inv) {
 function invoiceSheet(D, inv, go) {
   const m = D.meta, r = D.receivables;
   const open = D.receivables.open.find(o => o.invoice === inv.ref);
-  const terms = D.terms.find(x => x.code === inv.terms);
+  const terms = (D.terms || []).find(x => x.code === inv.terms) || { fr: inv.terms, en: inv.terms };
   const line = (label, value, cls) => h("div", { class: "fac-row" },
     h("span", { text: label }), h("span", { class: "n " + (cls || ""), text: value }));
 
@@ -660,7 +660,7 @@ function invoices(D, go) {
     { label: t("cInvoice"), c: true, render: i2 => i2.ref },
     { label: t("cDate"), render: i2 => date(i2.date) },
     { label: t("cCustomer"), render: i2 => i2.customer },
-    { label: t("cTerms"), render: i2 => { const x = D.terms.find(y => y.code === i2.terms); return pick(x.fr, x.en); } },
+    { label: t("cTerms"), render: i2 => { const x = (D.terms || []).find(y => y.code === i2.terms); return x ? pick(x.fr, x.en) : i2.terms; } },
     { label: t("cDue"), render: i2 => date(i2.due) },
     { label: t("cHT"), n: true, render: i2 => num(i2.ht) },
     { label: t("cTTC"), n: true, render: i2 => num(i2.total) },
@@ -699,7 +699,7 @@ function reminders(D, go) {
   }
 
   const drawLetter = o => {
-    const inv = D.invoices.find(i2 => i2.ref === o.invoice);
+    const inv = (D.invoices || []).find(i2 => i2.ref === o.invoice);
     letterBox.innerHTML = "";
     letterBox.append(
       h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("remLetter") }),
@@ -863,13 +863,13 @@ function record(D, go) {
   const result = h("div", { class: "result", hidden: true });
   const input = h("input", { type: "text", placeholder: t("rPlaceholder") });
   const when = h("input", { type: "date", value: "2026-09-14", min: "2026-01-01", max: "2026-09-30" });
-  const termsSel = h("select", {}, D.terms.map(x =>
+  const termsSel = h("select", {}, (D.terms || []).map(x =>
     h("option", { value: x.code, selected: x.code === "30fdm", text: pick(x.fr, x.en) })));
   const dueLine = h("p", { class: "muted", style: { margin: "10px 0 0", fontSize: "12px" } });
 
   // "30 jours fin de mois" : on ajoute les jours, puis on repousse au dernier jour du mois.
   const dueDate = (iso, code) => {
-    const spec = D.terms.find(x => x.code === code);
+    const spec = (D.terms || []).find(x => x.code === code) || { days: 0, eom: false, fr: "-", en: "-" };
     const d = new Date(iso + "T00:00:00");
     d.setDate(d.getDate() + spec.days);
     if (spec.eom) d.setDate(new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate());
@@ -878,7 +878,7 @@ function record(D, go) {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   };
   const refreshDue = () => {
-    const spec = D.terms.find(x => x.code === termsSel.value);
+    const spec = (D.terms || []).find(x => x.code === termsSel.value) || { fr: "-", en: "-" };
     dueLine.innerHTML = t("rDueExplain", {
       terms: "<b>" + pick(spec.fr, spec.en).toLowerCase() + "</b>",
       date: date(when.value, true),

@@ -131,7 +131,9 @@ function go(hash) { location.hash = hash; }
 
 addEventListener("hashchange", render);
 
-fetch("data/books.json")
+// no-cache : on revalide toujours aupres du serveur. Les navigateurs qui ont visite
+// le site avant la correction des en-tetes gardent sinon un fichier plus ancien que le code.
+fetch("data/books.json", { cache: "no-cache" })
   .then(r => r.json())
   .then(data => { D = data; render(); })
   .catch(e => {
