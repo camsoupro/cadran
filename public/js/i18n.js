@@ -88,6 +88,19 @@ export const STR = {
   recDsoNote: ["sur les {n} factures réglées à ce jour", "over the {n} invoices settled so far"],
   recLateTotal: ["Encours échu", "Past due"],
   recPenalties: ["Pénalités et indemnités exigibles", "Interest and charges claimable"],
+  recDoubtful: ["Créances douteuses et dépréciation", "Doubtful debts and allowance"],
+  recDoubtfulNote: [
+    "Une créance qu'on n'espère plus recouvrer se transfère en compte 416, clients douteux, et se déprécie pour sa valeur hors taxes par le compte 491. La dotation est une charge : c'est par là qu'un retard de paiement finit par toucher le résultat, et pas seulement la trésorerie.",
+    "A receivable you no longer expect to collect moves to account 416, doubtful customers, and is written down at its net of VAT value through account 491. The charge hits the income statement: that is how a late payment ends up touching the result, and not only the cash."],
+  recStressTitle: ["Test de résistance", "Stress test"],
+  recStressNote: [
+    "Chaque client professionnel porte un encours. Si l'un d'eux se mettait à payer comme {customer}, il faudrait le déprécier à son tour. Voici ce que deviendrait le résultat, client par client, du plus gros encours au plus petit.",
+    "Every trade customer carries a balance. If one of them started paying like {customer}, it would have to be written down too. Here is what the result would become, customer by customer, largest balance first."],
+  recExposure: ["Encours HT", "Balance net of VAT"],
+  recResultAfter: ["Résultat après dépréciation", "Result after the write down"],
+  recGross: ["Créances brutes", "Gross receivables"],
+  recAllowance: ["Dépréciation", "Allowance"],
+  recNet: ["Créances nettes", "Net receivables"],
   recTermsNote: [
     "Les délais accordés vont du comptant au 45 jours fin de mois, le maximum que la loi française autorise.",
     "Terms granted run from payment on receipt to 45 days end of month, the maximum French law allows."],
@@ -104,11 +117,11 @@ export const STR = {
     "Terms of {terms} applied to an invoice dated {date} give {due}."],
 
   // ---------------------------------------------------------------- overview
-  ovTitle: ["L'année est courte de", "The year is short by"],
-  ovTitleEnd: [", et les livres disent où.", ", and the books say where."],
+  ovTitle: ["L'exercice gagne", "The year earns"],
+  ovTitleEnd: [", et tient à un seul client.", ", and hangs on a single customer."],
   ovLede: [
-    "Neuf mois d'activité : {sales} de chiffre d'affaires, {kg} kg de café torréfié, et une perte de {loss}. Chaque chiffre de cette page est calculé à partir des {entries} écritures du journal, jamais saisi à la main.",
-    "Nine months of trading: {sales} of sales, {kg} kg of coffee roasted, and a loss of {loss}. Every figure on this page is computed from the {entries} journal entries, never typed in by hand."],
+    "Neuf mois d'activité : {sales} de chiffre d'affaires, {kg} kg de café torréfié, et un bénéfice de {profit}. Chaque chiffre de cette page est calculé à partir des {entries} écritures du journal, jamais saisi à la main.",
+    "Nine months of trading: {sales} of sales, {kg} kg of coffee roasted, and a profit of {profit}. Every figure on this page is computed from the {entries} journal entries, never typed in by hand."],
   ovDebits: ["Total des débits", "Total debits"],
   ovCredits: ["Total des crédits", "Total credits"],
   ovOutOfBalance: ["Hors équilibre", "Out of balance"],
@@ -127,10 +140,15 @@ export const STR = {
   kMarginNote: ["Ventes moins le café vert et les emballages consommés.",
     "Sales less green coffee and packaging consumed."],
 
-  ovFinding: ["Le point qui décide de l'année", "The one figure that decides the year"],
+  ovFinding: ["Où part la marge", "Where the margin goes"],
+  ovFragile: ["Ce qui ferait basculer l'exercice", "What would tip the year over"],
+  ovFragileText: [
+    "{customer} ne règle plus rien depuis le printemps : {n} factures impayées, {amount} passés en dépréciation à la clôture. Le bénéfice de {result} tient déjà compte de cette perte. Mais les autres clients professionnels doivent encore {exposure} hors taxes. <b>Il suffirait que {top} cesse de payer à son tour</b>, soit {topAmount} à déprécier, pour que l'exercice tombe à {after}. Un bénéfice de cette taille ne survit pas à un deuxième mauvais payeur.",
+    "{customer} has paid nothing since the spring: {n} unpaid invoices, {amount} written down at closing. The {result} profit already carries that loss. But the other trade customers still owe {exposure} net of VAT. <b>One more of them stopping payment</b>, {top}, would mean {topAmount} more to write down and would take the year to {after}. A profit this thin does not survive a second bad payer."],
+  ovSeeReceivables: ["Voir le détail client par client", "See it customer by customer"],
   ovFindingText: [
-    "L'atelier a consommé {excess} kg de café vert de plus que le standard n'autorise pour cette production : un rendement réel de {real} % contre {std} % retenu dans le coût standard. Cet écart de quantité coûte {qty}. À côté, le café vert a été payé {avg} le kilo au lieu de {stdp} : cet écart de prix coûte {price}. Ensemble, <b>ils expliquent {share} % de la perte de l'exercice</b>, et aucun des deux n'est un problème commercial.",
-    "The workshop used {excess} kg of green coffee more than the standard allows for this output: a real yield of {real} % against the {std} % built into the standard cost. That quantity variance costs {qty}. Alongside it, green coffee was paid {avg} a kilo instead of {stdp}: that price variance costs {price}. Together <b>they account for {share} % of the loss for the period</b>, and neither of them is a commercial problem."],
+    "L'atelier a consommé {excess} kg de café vert de plus que le standard n'autorise pour cette production : un rendement réel de {real} % contre {std} % retenu dans le coût standard. Cet écart de quantité coûte {qty}. À côté, le café vert a été payé {avg} le kilo au lieu de {stdp} : cet écart de prix coûte {price}. Ensemble, <b>ils valent {times} fois le bénéfice de l'exercice</b>, et aucun des deux n'est un problème commercial.",
+    "The workshop used {excess} kg of green coffee more than the standard allows for this output: a real yield of {real} % against the {std} % built into the standard cost. That quantity variance costs {qty}. Alongside it, green coffee was paid {avg} a kilo instead of {stdp}: that price variance costs {price}. Together <b>they are worth {times} times the profit for the period</b>, and neither of them is a commercial problem."],
   ovSeeProduction: ["Voir le détail par brassin", "See it batch by batch"],
 
   ovMonths: ["Neuf mois", "Nine months"],
@@ -422,8 +440,8 @@ export const STR = {
     "Le coût standard retient {std} % de rendement. Le réel est de {real} %. Pour {roasted} kg de café torréfié, le standard autorisait {allowed} kg de vert ; l'atelier en a consommé {used} kg. Les {excess} kg de trop, valorisés au prix standard, sont l'<b>écart sur quantité</b> : {qty}.",
     "The standard assumes a {std} % yield. The real one is {real} %. For {roasted} kg of roasted coffee the standard allowed {allowed} kg of green; the workshop used {used} kg. The {excess} kg too many, valued at the standard price, are the <b>quantity variance</b>: {qty}."],
   tu6b: [
-    "Le café vert a par ailleurs été payé {avg} le kilo au lieu des {stdp} du standard : c'est l'<b>écart sur prix</b>, {price}. Additionnés, ces deux écarts valent {total}, soit {share} % de la perte de l'exercice, qui est de {loss}. Un compte de résultat seul ne dit pas cela : il montre la perte, pas ses causes.",
-    "Green coffee was also paid {avg} a kilo instead of the {stdp} in the standard: that is the <b>price variance</b>, {price}. Added together the two variances are worth {total}, that is {share} % of the loss for the period, which stands at {loss}. An income statement alone does not tell you this: it shows the loss, not its causes."],
+    "Le café vert a par ailleurs été payé {avg} le kilo au lieu des {stdp} du standard : c'est l'<b>écart sur prix</b>, {price}. Additionnés, ces deux écarts valent {total}, quand le bénéfice de l'exercice n'est que de {profit}. Un compte de résultat seul ne dit pas cela : il montre le résultat, pas ce qui le ronge.",
+    "Green coffee was also paid {avg} a kilo instead of the {stdp} in the standard: that is the <b>price variance</b>, {price}. Added together the two variances are worth {total}, when the profit for the period is only {profit}. An income statement alone does not tell you this: it shows the result, not what eats it."],
   tu7t: ["Les états financiers", "The statements"],
   tu7a: [
     "Le compte de résultat additionne les classes 6 et 7 : il répond à la question « a-t-on gagné de l'argent ». Le bilan photographie les classes 1 à 5 au dernier jour : il répond à « que possède-t-on, et à qui ».",

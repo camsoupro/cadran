@@ -70,6 +70,8 @@ ACCOUNTS: list[tuple[str, str, str, str]] = [
     ("355000", "Stock de cafe torrefie", "Roasted coffee inventory", "asset"),
     ("401000", "Fournisseurs", "Trade payables", "liability"),
     ("411000", "Clients", "Trade receivables", "asset"),
+    ("416000", "Clients douteux", "Doubtful trade receivables", "asset"),
+    ("491000", "Depreciations des comptes clients", "Allowance for doubtful debts", "asset"),
     ("421000", "Personnel, remunerations dues", "Wages payable", "liability"),
     ("431000", "Securite sociale et organismes sociaux", "Social security payable", "liability"),
     ("445510", "TVA a decaisser", "VAT payable", "liability"),
@@ -96,6 +98,7 @@ ACCOUNTS: list[tuple[str, str, str, str]] = [
     ("645100", "Charges de securite sociale", "Social security contributions", "expense"),
     ("661100", "Interets des emprunts", "Interest on loans", "expense"),
     ("681100", "Dotations aux amortissements", "Depreciation charge", "expense"),
+    ("681740", "Dotations aux depreciations des creances", "Charge for doubtful debts", "expense"),
     ("701000", "Ventes de cafe torrefie", "Sales of roasted coffee", "income"),
     ("706000", "Prestations, bar et degustations", "Services, counter and tastings", "income"),
     ("708500", "Ports factures", "Delivery income", "income"),
@@ -229,7 +232,7 @@ STD_COST = r2(STD_GREEN_PRICE / STD_YIELD + STD_PACKAGING + STD_CONVERSION)
 PRICES = {           # EUR per kg, excluding VAT
     "BTQ": 27.90,
     "WEB": 26.40,
-    "GRO": 14.30,
+    "GRO": 15.90,
 }
 
 state = {
@@ -510,6 +513,10 @@ def settle_customers(day: date) -> None:
     for item in open_items:
         if item["settled"]:
             continue
+        # Cantine Numerique ne regle plus rien depuis le printemps : c'est ce client
+        # qui rend l'exercice fragile, et c'est lui qu'on deprecie a la cloture
+        if item["customer"] == "Cantine Numerique" and item["date"] >= "2026-05-01":
+            continue
         due = date.fromisoformat(item["due"])
         if item.get("slow"):
             due = due + timedelta(days=random.choice([28, 35, 46, 62]))
@@ -737,6 +744,33 @@ for m in range(1, 10):
             pay_suppliers(d)
     monthly_costs(days[-1], m)
 
+# ----------------------------------------------------------------- cloture, depreciations
+
+DOUBTFUL_AFTER = 60          # jours de retard au dela desquels la creance est douteuse
+
+doubtful: list[dict] = []
+_prov_total = 0.0
+for it in open_items:
+    if it["settled"]:
+        continue
+    late = (END - date.fromisoformat(it["due"])).days
+    if late <= DOUBTFUL_AFTER:
+        continue
+    ht = r2(it["amount"] / (1 + VAT_FOOD))      # la depreciation porte sur le hors taxes
+    doubtful.append({**it, "late": late, "ht": ht})
+    _prov_total = r2(_prov_total + ht)
+
+if doubtful:
+    # on transfere les creances concernees en clients douteux, puis on les deprecie
+    B.post(END, "OD", "Transfert en clients douteux a la cloture",
+           "Doubtful receivables reclassified at closing",
+           [("416000", r2(sum(d["amount"] for d in doubtful)), 0, None, "Clients douteux")] +
+           [("411000", 0, r2(sum(d["amount"] for d in doubtful)), None, "Clients")])
+    B.post(END, "OD", f"Depreciation des creances douteuses, {len(doubtful)} factures",
+           f"Allowance for doubtful debts, {len(doubtful)} invoices",
+           [("681740", _prov_total, 0, "ADM", "Dotation de l'exercice"),
+            ("491000", 0, _prov_total, None, "Depreciation des comptes clients")])
+
 # --------------------------------------------------------------------------- statements
 
 def build() -> dict:
@@ -782,7 +816,9 @@ def build() -> dict:
     gross_fixed = group(("205", "213", "215", "218"))
     dep_fixed = r2(-group(("280", "281")))
     inventory = group(("310", "320", "355"))
-    receivables = bal("411000")
+    receivables = r2(bal("411000") + bal("416000") + bal("491000"))
+    receivables_gross = r2(bal("411000") + bal("416000"))
+    allowance = r2(-bal("491000"))
     vat_in = bal("445660")
     cash = r2(bal("512000") + bal("530000"))
     assets = r2(gross_fixed - dep_fixed + inventory + receivables + vat_in + cash)
@@ -873,7 +909,38 @@ def build() -> dict:
     dso = (round(sum((date.fromisoformat(i["paid_on"]) - date.fromisoformat(i["date"])).days
                      for i in paid) / len(paid), 1) if paid else 0.0)
 
+    # Test de resistance. Chaque client professionnel represente un encours ; si son
+    # comportement de paiement devenait celui du client deja douteux, il faudrait le
+    # deprecier a son tour, et la dotation est une charge. On empile les clients du plus
+    # gros encours au plus petit jusqu'a ce que le resultat passe sous zero.
+    exposure: dict[str, float] = {}
+    already = {d["customer"] for d in doubtful}     # deja deprecie, on ne le compte pas deux fois
+    for it in open_items:
+        if it["settled"] or it["customer"] in already:
+            continue
+        ht = r2(it["amount"] / (1 + VAT_FOOD))
+        exposure[it["customer"]] = r2(exposure.get(it["customer"], 0.0) + ht)
+    ranked = sorted(exposure.items(), key=lambda kv: -kv[1])
+    running, tipping, needed = net, None, []
+    for name, ht in ranked:
+        needed.append({"customer": name, "ht": ht, "result_after": r2(running - ht)})
+        running = r2(running - ht)
+        if tipping is None and running < 0:
+            tipping = len(needed)
+    stress = {
+        "result": net,
+        "allowance_booked": _prov_total,
+        "doubtful_count": len(doubtful),
+        "doubtful_customer": doubtful[0]["customer"] if doubtful else None,
+        "ranked": needed,
+        "tipping": tipping,
+        "exposure_total": r2(sum(exposure.values())),
+    }
+
     return {
+        "stress": stress,
+        "doubtful": [{k: d[k] for k in ("invoice", "customer", "date", "due", "amount", "ht", "late")}
+                     for d in doubtful],
         "meta": {**COMPANY, "generated": date.today().isoformat(),
                  "entries": len(B.entries),
                  "lines": sum(len(e["lines"]) for e in B.entries),
@@ -901,7 +968,8 @@ def build() -> dict:
             "net_fixed": r2(gross_fixed - dep_fixed),
             "inventory_green": bal("310000"), "inventory_pack": bal("320000"),
             "inventory_fg": bal("355000"), "inventory": inventory,
-            "receivables": receivables, "vat_in": vat_in, "cash": cash,
+            "receivables": receivables, "receivables_gross": receivables_gross,
+            "allowance": allowance, "vat_in": vat_in, "cash": cash,
             "bank": bal("512000"), "till": bal("530000"), "assets": assets,
             "capital": capital, "reserve": reserve, "retained": retained, "result": net,
             "loans": loans, "payables": payables, "wages_due": wages_due,
@@ -986,4 +1054,7 @@ r = books["receivables"]
 print(f"invoices          {len(invoices):>12,}")
 print(f"open / late       {len(r['open']):>12}  late {r['late_total']:,.2f}")
 print(f"DSO reel          {r['dso']:>12} jours sur {r['paid_count']} factures payees")
+st = books["stress"]
+print(f"depreciation      {st['allowance_booked']:>12,.2f}  sur {st['doubtful_count']} factures")
+print(f"bascule apres     {st['tipping']:>12}  clients de plus")
 print(f"json bytes        {(out / 'books.json').stat().st_size:>12,}")

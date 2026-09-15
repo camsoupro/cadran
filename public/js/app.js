@@ -34,6 +34,15 @@ const NAV = [
   ["navLearn", [["tutorial", "pTutorial"]]],
 ];
 
+const LOGO = `<svg viewBox="0 0 48 48" width="{w}" height="{w}" aria-hidden="true" style="display:block">
+  <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor" stroke-width="1.8" opacity=".85"/>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".45">
+    <path d="M24 6.5v4M41.5 24h-4M24 41.5v-4M6.5 24h4"/></g>
+  <path d="M24 24 13.5 34.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".28"/>
+  <path d="M24 24 35 13" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="24" cy="24" r="2.6" fill="var(--accent)"/></svg>`;
+const logo = size => h("span", { class: "logo", html: LOGO.split("{w}").join(size) });
+
 function icon(path, size = 15) {
   return h("span", {
     html: `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -55,7 +64,9 @@ function buildRail() {
 
   return h("aside", { class: "rail" },
     h("div", {},
-      h("div", { class: "wordmark" }, "Cadran", h("span", { text: "." })),
+      h("div", { class: "brand" },
+        logo(30),
+        h("span", { class: "wordmark" }, "Cadran", h("span", { text: "." }))),
       h("p", { text: t("tagline") }),
       h("span", { class: "demo-flag", text: t("demoFlag") })),
     nav,
@@ -125,7 +136,9 @@ async function render() {
       class: "burger", "aria-label": t("navBooks"),
       onclick: () => { rail.classList.toggle("open"); scrim.classList.toggle("on"); },
     }, h("i", {}), h("i", {}), h("i", {})),
-    h("span", { class: "wordmark" }, "Cadran", h("span", { text: "." })),
+    h("span", { class: "brand" },
+      logo(24),
+      h("span", { class: "wordmark" }, "Cadran", h("span", { text: "." }))),
     h("span", { class: "here", text: t(page.title) }));
 
   const app = h("div", { class: "app" }, rail, main);

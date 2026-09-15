@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Cadran">
+  <!-- Le cadran : un cercle, quatre reperes, une aiguille cuivre et son ombre.
+       Le cercle prend la couleur du texte autour, l'aiguille garde le cuivre. -->
+  <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor" stroke-width="1.8" opacity=".85"/>
+  <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".45">
+    <path d="M24 6.5v4M41.5 24h-4M24 41.5v-4M6.5 24h4"/>
+  </g>
+  <path d="M24 24 13.5 34.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".28"/>
+  <path d="M24 24 35 13" stroke="#A8571F" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="24" cy="24" r="2.6" fill="#A8571F"/>
+</svg>

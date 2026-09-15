@@ -46,7 +46,8 @@ function entrySheet(D, e) {
 
 async function overview(D, go) {
   const i = D.income_statement, b = D.balance_sheet, p = D.production, m = D.meta;
-  const loss = Math.abs(i.net);
+  const st = D.stress || {};
+  const profit = Math.abs(i.net);
   const materials = i.purchases + i.stock_change;
   const materialMargin = i.sales - materials;
   const root = h("div", {});
@@ -55,13 +56,13 @@ async function overview(D, go) {
   const hero = h("div", { class: "hero reveal" },
     h("div", {},
       h("h2", { class: "head" }, t("ovTitle"), " ",
-        h("em", { text: money(loss, { compact: true }) }), t("ovTitleEnd")),
+        h("em", { text: money(profit, { compact: true }) }), t("ovTitleEnd")),
       h("p", {
         class: "lede",
         text: t("ovLede", {
           sales: money(i.sales, { compact: true }),
           kg: num(p.roasted_kg, 0),
-          loss: money(loss, { compact: true }),
+          profit: money(profit, { compact: true }),
           entries: num(m.entries, 0),
         }),
       }),
@@ -106,10 +107,21 @@ async function overview(D, go) {
       price: money(p.variance_price),
       avg: money(p.avg_green_price),
       stdp: money(p.std_green),
-      share: num(p.variance / Math.abs(i.net) * 100, 0),
+      times: num(p.variance / Math.abs(i.net), 1),
     })),
     h("p", { style: { marginTop: "16px" } },
       h("a", { href: "#/production", class: "btn primary", text: t("ovSeeProduction") })));
+
+  const top = (st.ranked || [])[0];
+  const fragile = !top ? null : h("section", { class: "reveal" },
+    callout(t("ovFragile"), t("ovFragileText", {
+      customer: st.doubtful_customer, n: st.doubtful_count,
+      amount: money(st.allowance_booked), result: money(i.net),
+      exposure: money(st.exposure_total), top: top.customer,
+      topAmount: money(top.ht), after: money(top.result_after),
+    })),
+    h("p", { style: { marginTop: "16px" } },
+      h("a", { href: "#/receivables", class: "btn primary", text: t("ovSeeReceivables") })));
 
   const chart = h("svg", { class: "chart" });
   const months = section(t("ovMonths"), t("ovMonthsSub"),
@@ -156,7 +168,7 @@ async function overview(D, go) {
   latest.querySelector(".sec-head").append(
     h("span", { class: "right" }, h("a", { href: "#/journal", class: "btn", text: t("seeAll") })));
 
-  root.append(hero, figs, finding, months, centres, lastSec, latest);
+  root.append(hero, figs, finding, fragile, months, centres, lastSec, latest);
 
   const disposers = [];
   queueMicrotask(async () => {
@@ -505,7 +517,7 @@ function production(D) {
             excess: num(p.excess_green, 0), real: num(p.yield * 100, 1),
             std: num(p.std_yield * 100, 0), qty: money(p.variance_qty),
             price: money(p.variance_price), avg: money(p.avg_green_price), stdp: money(p.std_green),
-            share: num(p.variance / Math.abs(i.net) * 100, 0),
+            times: num(p.variance / Math.abs(i.net), 1),
           })))),
         h("p", { class: "caps", style: { margin: "34px 0 10px" }, text: t("prTable") }),
         bTable)),
@@ -564,6 +576,39 @@ function receivables(D, go) {
     figure(t("remPenalty"), money(r.penalties), t("facLegal", {
       rate: num(r.late_rate * 100, 2), fee: money(r.fee) }).split(".")[0], "warn"));
 
+  const st = D.stress || {};
+  const bs = D.balance_sheet;
+  const doubtfulBlock = !st.doubtful_count ? null : h("div", {},
+    h("p", { class: "caps", style: { margin: "34px 0 10px" }, text: t("recDoubtful") }),
+    reading(t("recDoubtfulNote")),
+    table([
+      { label: t("cInvoice"), c: true, render: d => d.invoice },
+      { label: t("cCustomer"), render: d => d.customer },
+      { label: t("cDue"), render: d => dateAuto(d.due) },
+      { label: t("recLate"), n: true, cls: () => "neg", render: d => d.late + " " + t("recDays") },
+      { label: t("cTTC"), n: true, hide: true, render: d => num(d.amount) },
+      { label: t("recAllowance"), n: true, cls: () => "neg", render: d => num(d.ht) },
+    ], D.doubtful || [], {
+      foot: h("tr", {}, h("td", { colspan: 4, text: t("cTotals") }),
+        h("td", { class: "n hm", text: num((D.doubtful || []).reduce((a, d) => a + d.amount, 0)) }),
+        h("td", { class: "n neg", text: num(st.allowance_booked) })),
+    }),
+    h("div", { class: "kv", style: { marginTop: "16px", maxWidth: "420px" } },
+      h("dl", { class: "kv" },
+        h("dt", { text: t("recGross") }), h("dd", { class: "num", text: num(bs.receivables_gross) }),
+        h("dt", { text: t("recAllowance") }), h("dd", { class: "num neg", text: "-" + num(bs.allowance) }),
+        h("dt", { text: t("recNet") }), h("dd", { class: "num", text: num(bs.receivables) }))));
+
+  const stressBlock = !(st.ranked || []).length ? null : h("div", {},
+    h("p", { class: "caps", style: { margin: "34px 0 10px" }, text: t("recStressTitle") }),
+    reading(t("recStressNote", { customer: st.doubtful_customer })),
+    table([
+      { label: t("cCustomer"), render: r2 => r2.customer },
+      { label: t("recExposure"), n: true, render: r2 => num(r2.ht) },
+      { label: t("recResultAfter"), n: true, cls: r2 => tone(r2.result_after),
+        render: r2 => num(r2.result_after) },
+    ], st.ranked));
+
   return {
     node: h("div", {},
       section(t("recTitle"), null, reading(t("recRead")), figs,
@@ -587,7 +632,8 @@ function receivables(D, go) {
               onRow: o => o.late > 0 ? go("#/reminders") : go("#/invoices"),
               foot: h("tr", {}, h("td", { colspan: 5, text: t("cTotal") }),
                 h("td", { class: "n", text: num(r.total) })),
-            }))))),
+            }))),
+        doubtfulBlock, stressBlock)),
   };
 }
 
@@ -1082,8 +1128,7 @@ function tutorial(D, go) {
       t("tu6b", {
         avg: money(p.avg_green_price), stdp: money(p.std_green),
         price: money(p.variance_price), total: money(p.variance),
-        loss: money(Math.abs(i.net)),
-        share: num(p.variance / Math.abs(i.net) * 100, 0),
+        profit: money(Math.abs(i.net)),
       }),
     ], d6, ["production", "pProduction"]),
     step(t("tu7t"), [t("tu7a"), t("tu7b")], d7, ["income", "pIncome"]),

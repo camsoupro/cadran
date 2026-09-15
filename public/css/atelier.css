@@ -48,6 +48,8 @@ a{color:inherit}
 .rail{position:sticky; top:0; height:100vh; display:flex; flex-direction:column;
   padding:24px 18px 18px; border-right:1px solid var(--line); background:var(--raised);
   transition:background-color .45s ease, border-color .45s ease}
+.brand{display:flex; align-items:center; gap:10px}
+.brand .logo{flex:none; color:var(--ink); display:block}
 .wordmark{font-family:var(--serif); font-size:25px; line-height:1; letter-spacing:.01em}
 .wordmark span{color:var(--accent)}
 .wordmark + p{margin:6px 0 0; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3)}
@@ -294,7 +296,7 @@ tr.head-row td{padding-top:20px; font-family:var(--serif); font-size:15px}
 /* ---------- barre mobile et tiroir de navigation ---------- */
 .mobile-bar{display:none; position:sticky; top:0; z-index:35; align-items:center; gap:12px;
   padding:9px 16px; background:var(--raised); border-bottom:1px solid var(--line)}
-.mobile-bar .wordmark{font-size:20px}
+.mobile-bar .wordmark{font-size:19px}
 .mobile-bar .here{margin-left:auto; font-size:11px; color:var(--ink-3)}
 .burger{width:40px; height:36px; display:grid; place-content:center; gap:4px; border:1px solid var(--line);
   border-radius:4px; background:var(--paper); cursor:pointer; padding:0}

@@ -38,11 +38,11 @@ export function money(v, { compact = false, sign = false } = {}) {
   const s = (v || 0) < 0 ? "-" : sign ? "+" : "";
   if (compact && abs >= 1e6) {
     const body = new Intl.NumberFormat(locale(), { maximumFractionDigits: 2 }).format(abs / 1e6);
-    return lang() === "en" ? `${s}€${body}M` : `${s}${body} M€`;
+    return lang() === "en" ? `${s}€${body}M` : `${s}${body} M€`;
   }
   if (compact) {
     const body = new Intl.NumberFormat(locale(), { maximumFractionDigits: 0 }).format(abs);
-    return lang() === "en" ? `${s}€${body}` : `${s}${body} €`;
+    return lang() === "en" ? `${s}€${body}` : `${s}${body} €`;
   }
   const body = new Intl.NumberFormat(locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(abs);
   return lang() === "en" ? `${s}€${body}` : `${s}${body} €`;
@@ -50,12 +50,12 @@ export function money(v, { compact = false, sign = false } = {}) {
 export function pct(v, digits = 1) {
   return new Intl.NumberFormat(locale(), {
     minimumFractionDigits: digits, maximumFractionDigits: digits,
-  }).format(v || 0) + " %";
+  }).format(v || 0) + " %";
 }
 export function kg(v, digits = 0) {
   return new Intl.NumberFormat(locale(), {
     minimumFractionDigits: digits, maximumFractionDigits: digits,
-  }).format(v || 0) + " kg";
+  }).format(v || 0) + " kg";
 }
 export function date(iso, long = false) {
   const d = new Date(iso + "T00:00:00");
