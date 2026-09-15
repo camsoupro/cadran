@@ -114,8 +114,22 @@ async function render() {
   document.title = `${t(page.title)} · Cadran, ${t("demoFlag")}`;
 
   const main = h("main", { class: "sheet" }, buildTop(page), dateline());
-  const app = h("div", { class: "app" }, buildRail(), main);
-  document.body.replaceChildren(app);
+  const rail = buildRail();
+  const scrim = h("div", { class: "scrim" });
+  const close = () => { rail.classList.remove("open"); scrim.classList.remove("on"); };
+  scrim.addEventListener("click", close);
+  rail.addEventListener("click", e => { if (e.target.closest("a")) close(); });
+
+  const bar = h("div", { class: "mobile-bar" },
+    h("button", {
+      class: "burger", "aria-label": t("navBooks"),
+      onclick: () => { rail.classList.toggle("open"); scrim.classList.toggle("on"); },
+    }, h("i", {}), h("i", {}), h("i", {})),
+    h("span", { class: "wordmark" }, "Cadran", h("span", { text: "." })),
+    h("span", { class: "here", text: t(page.title) }));
+
+  const app = h("div", { class: "app" }, rail, main);
+  document.body.replaceChildren(bar, scrim, app);
 
   let out;
   try {

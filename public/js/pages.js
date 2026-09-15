@@ -1,7 +1,7 @@
 // Every page of the demonstration. Each one returns a DOM node and, when it holds
 // a 3D scene, a cleanup function the router calls before leaving.
 import { t, pick, lang } from "./i18n.js";
-import { h, num, money, pct, kg, date, monthName, tone, table, section, reading, figure,
+import { h, num, money, pct, kg, date, dateAuto, monthName, tone, table, section, reading, figure,
   callout, bars, badge, countUp, revealAll } from "./ui.js";
 import { trend, sparkline, ageing } from "./charts.js";
 import { mountBalance, mountCentres } from "./scenes.js";
@@ -147,7 +147,7 @@ async function overview(D, go) {
   const latest = section(t("ovLatest"), t("ovLatestSub"),
     table([
       { label: t("cEntry"), c: true, render: e => e.number },
-      { label: t("cDate"), render: e => date(e.date) },
+      { label: t("cDate"), render: e => dateAuto(e.date) },
       { label: t("cMemo"), render: e => memo(e) },
       { label: t("cJournal"), c: true, render: e => e.journal },
       { label: t("cAmount"), n: true, render: e => num(e.total) },
@@ -199,10 +199,10 @@ function journal(D, go) {
     if (!rows.length) { list.append(h("p", { class: "muted", text: t("jNone") })); return; }
     list.append(table([
       { label: t("cEntry"), c: true, render: e => e.number },
-      { label: t("cDate"), render: e => date(e.date) },
+      { label: t("cDate"), render: e => dateAuto(e.date) },
       { label: t("cMemo"), render: e => memo(e) },
-      { label: t("cJournal"), c: true, render: e => e.journal },
-      { label: t("cPiece"), c: true, render: e => e.piece },
+      { label: t("cJournal"), c: true, hide: true, render: e => e.journal },
+      { label: t("cPiece"), c: true, hide: true, render: e => e.piece },
       { label: t("cAmount"), n: true, render: e => num(e.total) },
     ], rows.slice(0, shown), {
       onRow: e => {
@@ -257,9 +257,9 @@ function ledger(D, go) {
         `${current.num} ${accName(current)} · ${t("lMovements", { n: num(rows.length, 0) })}`),
       table([
         { label: t("cEntry"), c: true, render: r => r.e.number },
-        { label: t("cDate"), render: r => date(r.e.date) },
+        { label: t("cDate"), render: r => dateAuto(r.e.date) },
         { label: t("cLabel"), render: r => r.l.label },
-        { label: t("cCentre"), c: true, render: r => r.l.centre || "" },
+        { label: t("cCentre"), c: true, hide: true, render: r => r.l.centre || "" },
         { label: t("cDebit"), n: true, render: r => r.l.debit ? num(r.l.debit) : "" },
         { label: t("cCredit"), n: true, render: r => r.l.credit ? num(r.l.credit) : "" },
         { label: t("lRunning"), n: true, render: r => num(r.running) },
@@ -299,8 +299,8 @@ function trial(D) {
   const body = table([
     { label: t("cAccount"), c: true, render: r => r.head ? "" : r.a.num },
     { label: t("cLabel"), render: r => r.head ? h("b", { text: r.head }) : accName(r.a) },
-    { label: t("cDebit"), n: true, render: r => r.head ? "" : num(r.a.debit) },
-    { label: t("cCredit"), n: true, render: r => r.head ? "" : num(r.a.credit) },
+    { label: t("cDebit"), n: true, hide: true, render: r => r.head ? "" : num(r.a.debit) },
+    { label: t("cCredit"), n: true, hide: true, render: r => r.head ? "" : num(r.a.credit) },
     { label: t("cBalance"), n: true, cls: r => r.head ? "" : tone(r.a.balance), render: r => r.head ? "" : num(r.a.balance) },
   ], rows, {
     foot: h("tr", {}, h("td", {}), h("td", { text: t("cTotals") }),
@@ -483,11 +483,11 @@ function production(D) {
   const batches = p.batches.slice().reverse();
   const bTable = table([
     { label: t("prBatch"), c: true, render: b => b.ref },
-    { label: t("cDate"), render: b => date(b.date) },
+    { label: t("cDate"), render: b => dateAuto(b.date) },
     { label: t("prGreenKg"), n: true, render: b => num(b.green_kg, 0) },
     { label: t("prRoastedKg"), n: true, render: b => num(b.roasted_kg, 1) },
     { label: t("prYield"), n: true, cls: b => b.yield < b.std_yield ? "neg" : "pos", render: b => num(b.yield * 100, 1) + " %" },
-    { label: t("prStdValue"), n: true, render: b => num(b.std_value) },
+    { label: t("prStdValue"), n: true, hide: true, render: b => num(b.std_value) },
     { label: t("prVarQty"), n: true, cls: b => b.var_qty > 0 ? "neg" : "pos", render: b => num(b.var_qty) },
     { label: t("prVarPrice"), n: true, cls: b => b.var_price > 0 ? "neg" : "pos", render: b => num(b.var_price) },
   ], batches);
@@ -530,8 +530,8 @@ function inventory(D) {
         table([
           { label: t("prBatch"), c: true, render: l => l.ref },
           { label: t("invOrigin"), render: l => pick(l.origin_fr, l.origin_en) },
-          { label: t("invBought"), render: l => date(l.date) },
-          { label: t("invKgIn"), n: true, render: l => num(l.kg_in, 0) },
+          { label: t("invBought"), render: l => dateAuto(l.date) },
+          { label: t("invKgIn"), n: true, hide: true, render: l => num(l.kg_in, 0) },
           { label: t("invKgLeft"), n: true, render: l => num(l.kg_left, 1) },
           { label: t("invPrice"), n: true, render: l => num(l.price) },
           { label: t("invValue"), n: true, render: l => num(l.kg_left * l.price) },
@@ -578,8 +578,8 @@ function receivables(D, go) {
             table([
               { label: t("cInvoice"), c: true, render: o => o.invoice || o.entry },
               { label: t("cCustomer"), render: o => o.customer },
-              { label: t("cTerms"), render: o => pick(o.terms_fr, o.terms_en) },
-              { label: t("cDue"), render: o => date(o.due) },
+              { label: t("cTerms"), hide: true, render: o => pick(o.terms_fr, o.terms_en) },
+              { label: t("cDue"), render: o => dateAuto(o.due) },
               { label: t("recLate"), n: true, cls: o => o.late > 0 ? "neg" : "",
                 render: o => o.late > 0 ? o.late + " " + t("recDays") : "-" },
               { label: t("cAmount"), n: true, render: o => num(o.amount) },
@@ -631,7 +631,7 @@ function invoiceSheet(D, inv, go) {
       { label: t("facQty"), n: true, render: i2 => num(i2.kg, 1) + " kg" },
       { label: t("facUnit"), n: true, render: i2 => num(i2.unit_price) },
       { label: t("cVAT"), n: true, render: i2 => num(i2.vat_rate * 100, 1) + " %" },
-      { label: t("cHT"), n: true, render: i2 => num(i2.ht) },
+      { label: t("cHT"), n: true, hide: true, render: i2 => num(i2.ht) },
     ], [inv]),
 
     h("div", { class: "fac-totals" },
@@ -658,10 +658,10 @@ function invoices(D, go) {
 
   const list = table([
     { label: t("cInvoice"), c: true, render: i2 => i2.ref },
-    { label: t("cDate"), render: i2 => date(i2.date) },
+    { label: t("cDate"), render: i2 => dateAuto(i2.date) },
     { label: t("cCustomer"), render: i2 => i2.customer },
-    { label: t("cTerms"), render: i2 => { const x = (D.terms || []).find(y => y.code === i2.terms); return x ? pick(x.fr, x.en) : i2.terms; } },
-    { label: t("cDue"), render: i2 => date(i2.due) },
+    { label: t("cTerms"), hide: true, render: i2 => { const x = (D.terms || []).find(y => y.code === i2.terms); return x ? pick(x.fr, x.en) : i2.terms; } },
+    { label: t("cDue"), render: i2 => dateAuto(i2.due) },
     { label: t("cHT"), n: true, render: i2 => num(i2.ht) },
     { label: t("cTTC"), n: true, render: i2 => num(i2.total) },
     { label: t("cStatus"), render: i2 => { const st = invoiceStatus(D, i2); return badge(t(st.key), st.cls); } },
@@ -719,11 +719,11 @@ function reminders(D, go) {
   const list = table([
     { label: t("cInvoice"), c: true, render: o => o.invoice },
     { label: t("cCustomer"), render: o => o.customer },
-    { label: t("cDue"), render: o => date(o.due) },
+    { label: t("cDue"), render: o => dateAuto(o.due) },
     { label: t("recLate"), n: true, cls: () => "neg", render: o => o.late + " " + t("recDays") },
     { label: t("cAmount"), n: true, render: o => num(o.amount) },
     { label: t("remPenalty"), n: true, render: o => num(o.penalty) },
-    { label: t("remFee"), n: true, render: o => num(o.fee) },
+    { label: t("remFee"), n: true, hide: true, render: o => num(o.fee) },
     { label: t("remClaim"), n: true, cls: () => "neg",
       render: o => num(o.amount + o.penalty + o.fee) },
   ], late, {

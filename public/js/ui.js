@@ -63,6 +63,15 @@ export function date(iso, long = false) {
     day: "numeric", month: long ? "long" : "short", year: "numeric",
   }).format(d);
 }
+/** Date courte sur telephone : 30/09/26 au lieu de 30 septembre 2026. */
+export function dateAuto(iso) {
+  if (innerWidth > 560) return date(iso);
+  const d = new Date(iso + "T00:00:00");
+  return new Intl.DateTimeFormat(locale(), {
+    day: "2-digit", month: "2-digit", year: "2-digit",
+  }).format(d);
+}
+
 export function monthName(m, short = true) {
   const d = new Date(2026, m - 1, 1);
   return new Intl.DateTimeFormat(locale(), { month: short ? "short" : "long" }).format(d)
@@ -79,11 +88,13 @@ export function section(title, sub, ...kids) {
 export function reading(html) { return h("p", { class: "reading", html }); }
 
 export function table(cols, rows, opts = {}) {
+  // hide: true retire la colonne sous 560 px de large, au lieu de tout comprimer
+  const base = c => (c.n ? "n " : c.c ? "c " : "") + (c.hide ? "hm " : "");
   const thead = h("thead", {}, h("tr", {}, cols.map(c =>
-    h("th", { class: c.n ? "n" : c.c ? "c" : "" }, c.label))));
+    h("th", { class: base(c).trim() }, c.label))));
   const tbody = h("tbody", {}, rows.map(r => {
     const tr = h("tr", { class: opts.onRow ? "clickable" : "" },
-      cols.map(c => h("td", { class: (c.n ? "n " : c.c ? "c " : "") + (c.cls ? c.cls(r) : "") },
+      cols.map(c => h("td", { class: base(c) + (c.cls ? c.cls(r) : "") },
         c.render ? c.render(r) : r[c.key])));
     if (opts.onRow) tr.addEventListener("click", () => opts.onRow(r));
     return tr;

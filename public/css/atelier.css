@@ -117,7 +117,7 @@ h2.head em{font-style:italic; color:var(--accent)}
 /* ---------- 3d ---------- */
 .scene{width:100%; height:320px; position:relative}
 .scene canvas{display:block}
-.lab{position:absolute; inset:0; pointer-events:none}
+.lab{position:absolute; inset:0; pointer-events:none; overflow:hidden}
 .lab span{position:absolute; transform:translate(-50%,-50%); text-align:center; white-space:nowrap;
   font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); line-height:1.5}
 .lab span b{display:block; font-family:var(--mono); font-size:11.5px; letter-spacing:0; text-transform:none; color:var(--ink)}
@@ -137,6 +137,7 @@ h2.head em{font-style:italic; color:var(--accent)}
 .legend i.sq{width:10px; height:10px; border:0; border-radius:2px; vertical-align:-1px}
 
 /* ---------- tables ---------- */
+.table-wrap{max-width:100%; overflow-x:auto}
 table{width:100%; border-collapse:collapse; font-size:12.5px}
 thead th{font-size:9.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); font-weight:400;
   text-align:left; padding:0 9px 9px; border-bottom:1px solid var(--ink); white-space:nowrap}
@@ -288,4 +289,62 @@ tr.head-row td{padding-top:20px; font-family:var(--serif); font-size:15px}
   section{padding:0; border:0}
   .invoice, .letter{border:0; box-shadow:none; padding:0}
   a[href]:after{content:""}
+}
+
+/* ---------- barre mobile et tiroir de navigation ---------- */
+.mobile-bar{display:none; position:sticky; top:0; z-index:35; align-items:center; gap:12px;
+  padding:9px 16px; background:var(--raised); border-bottom:1px solid var(--line)}
+.mobile-bar .wordmark{font-size:20px}
+.mobile-bar .here{margin-left:auto; font-size:11px; color:var(--ink-3)}
+.burger{width:40px; height:36px; display:grid; place-content:center; gap:4px; border:1px solid var(--line);
+  border-radius:4px; background:var(--paper); cursor:pointer; padding:0}
+.burger i{display:block; width:17px; height:1.5px; background:var(--ink)}
+.scrim{position:fixed; inset:0; background:rgba(0,0,0,.42); z-index:38; opacity:0;
+  pointer-events:none; transition:opacity .28s var(--ease)}
+.scrim.on{opacity:1; pointer-events:auto}
+
+@media (max-width:820px){
+  .app{display:block}
+  .mobile-bar{display:flex}
+  .rail{position:fixed; top:0; bottom:0; left:0; width:min(86vw,310px); height:100vh;
+    transform:translateX(-103%); transition:transform .28s var(--ease); z-index:40;
+    overflow-y:auto; border-right:1px solid var(--line); border-bottom:0;
+    box-shadow:0 0 44px rgba(0,0,0,.3)}
+  .rail.open{transform:none}
+  .rail nav{display:block; margin-top:14px}
+  .rail nav a{padding:13px 8px; font-size:14px}       /* cible tactile de 44 px */
+  .rail nav h3{margin-top:16px}
+  .topline{top:54px; padding:8px 0 9px}
+  .topline .crumb, .topline h1{display:none}   /* la barre mobile nomme deja la page */
+  .topline .tools{margin-left:0; width:100%; justify-content:flex-end}
+  .sheet{padding:0 16px 56px}
+  .scene{height:250px}
+  .fac-head{flex-direction:column; gap:18px}
+  .fac-meta{text-align:left}
+  .fac-totals{width:100%}
+  .step{grid-template-columns:1fr; gap:6px}
+  .step .no{font-size:20px}
+  .filters input, .filters select{min-width:0; width:100%}
+  .filters{gap:8px}
+  .count{margin-left:0}
+}
+
+@media (max-width:560px){
+  .hm{display:none}                                    /* colonnes secondaires */
+  th.n, td.n, td.c, th.c{white-space:nowrap}           /* un montant ne se coupe pas */
+  table{font-size:12px}
+  td{padding:10px 7px}
+  thead th{padding:0 7px 8px; font-size:9px; letter-spacing:.1em}
+  th.n,td.n{font-size:11.5px}
+  h2.head{font-size:30px}
+  .lede{font-size:14.5px}
+  .fig .v{font-size:32px}
+  .sec-head h2{font-size:20px}
+  .dateline{gap:6px 14px; font-size:9.5px}
+  .invoice, .letter, .entry-sheet, .sandbox{padding:18px 16px}
+  .scene{height:220px}
+  .lab span{font-size:9px}
+  .brow{grid-template-columns:96px 1fr 72px; gap:8px}
+  .topline h1{font-size:18px}
+  .chip{font-size:11px; padding:5px 9px}
 }
