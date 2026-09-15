@@ -1,0 +1,10 @@
+{
+  "name": "Cadran, demonstration comptable",
+  "short_name": "Cadran",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#EFE9DE",
+  "theme_color": "#EFE9DE",
+  "lang": "fr",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
