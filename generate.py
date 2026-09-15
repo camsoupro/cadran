@@ -17,6 +17,7 @@ writes public/data/books.json and public/data/fec-2026.txt
 from __future__ import annotations
 
 import json
+import math
 import random
 from datetime import date, timedelta
 from pathlib import Path
@@ -125,6 +126,8 @@ CENTRES = [
 # --------------------------------------------------------------------------- VAT
 # Coffee sold to take away is a foodstuff: reduced rate. Consumed at the counter: 10 %.
 # Delivery and trade services: standard rate.
+SEASON = {1: .88, 2: .90, 3: .97, 4: 1.0, 5: 1.02, 6: .96, 7: .78, 8: .70, 9: 1.08}
+
 VAT_FOOD = 0.055
 VAT_COUNTER = 0.10
 VAT_STANDARD = 0.20
@@ -134,6 +137,16 @@ VAT_STANDARD = 0.20
 
 def r2(x: float) -> float:
     return round(x + 1e-9, CENTS)
+
+
+def log_uniform(lo: float, hi: float) -> float:
+    """Tire entre lo et hi en echelle logarithmique.
+
+    Les tailles de commande d'une entreprise ne sont pas uniformes : il y a beaucoup
+    de petites commandes et quelques grosses. Un tirage uniforme donne une population
+    trop resserree, que la loi de Benford rejette a juste titre.
+    """
+    return math.exp(random.uniform(math.log(lo), math.log(hi)))
 
 
 class Books:
@@ -216,7 +229,7 @@ STD_COST = r2(STD_GREEN_PRICE / STD_YIELD + STD_PACKAGING + STD_CONVERSION)
 PRICES = {           # EUR per kg, excluding VAT
     "BTQ": 27.90,
     "WEB": 26.40,
-    "GRO": 15.40,
+    "GRO": 14.30,
 }
 
 state = {
@@ -258,15 +271,19 @@ def due_date(invoice_day: date, terms: str) -> date:
     return last_day_of(d) if end_of_month else d
 
 
-# nom, ville, SIREN fictif, delai, plafond de credit
+# nom, ville, SIREN fictif, delai, commande mini en kg, commande maxi en kg
+# Les volumes different d'un client a l'autre, c'est ce qui donne aux montants une
+# dispersion realiste : un petit cafe prend 8 kg, un grossiste en prend 600.
 TRADE_CUSTOMERS = [
-    ("Cafe des Artisans", "Lyon 1er", "000 111 222", "30fdm"),
-    ("Hotel Bellecour", "Lyon 2e", "000 222 333", "45fdm"),
-    ("Restaurant La Passerelle", "Lyon 6e", "000 333 444", "30n"),
-    ("Epicerie Bonne Graine", "Villeurbanne", "000 444 555", "30fdm"),
-    ("Bureau Partage Confluence", "Lyon 2e", "000 555 666", "45fdm"),
-    ("Boulangerie Saint-Jean", "Lyon 5e", "000 666 777", "30n"),
-    ("Cantine Numerique", "Villeurbanne", "000 777 888", "45fdm"),
+    ("Cafe des Artisans", "Lyon 1er", "000 111 222", "30fdm", 9, 26),
+    ("Hotel Bellecour", "Lyon 2e", "000 222 333", "45fdm", 60, 190),
+    ("Restaurant La Passerelle", "Lyon 6e", "000 333 444", "30n", 18, 48),
+    ("Epicerie Bonne Graine", "Villeurbanne", "000 444 555", "30fdm", 25, 90),
+    ("Bureau Partage Confluence", "Lyon 2e", "000 555 666", "45fdm", 12, 35),
+    ("Boulangerie Saint-Jean", "Lyon 5e", "000 666 777", "30n", 14, 40),
+    ("Cantine Numerique", "Villeurbanne", "000 777 888", "45fdm", 30, 110),
+    ("Grossiste Rhone Cafes", "Corbas", "000 888 999", "45fdm", 280, 620),
+    ("Chaine Le Comptoir", "Lyon 3e", "000 999 111", "30fdm", 120, 340),
 ]
 
 # Penalites de retard : taux directeur BCE majore de dix points, plus l'indemnite
@@ -399,6 +416,10 @@ def roast(day: date, target_kg: float) -> None:
                     "green_allowed": r2(green_allowed), "lots": used})
 
 
+def factor_of(day: date) -> float:
+    return SEASON[day.month]
+
+
 def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
     """A day of sales in one channel. Cash for the shop, account for trade customers."""
     if state["fg_kg"] < kg:
@@ -426,20 +447,31 @@ def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
                f"{lines_en}, {day.strftime('%d/%m')}", lines)
         state["vat_out"] += vat + extra_vat
     elif centre == "WEB":
-        ship_ht = r2(kg * 0.95)
+        # une commande en ligne, pas un total de journee : des montants de 12 a 120 EUR.
+        # Le port suit le poids par tranches, comme chez n'importe quel transporteur :
+        # un montant fige et repete mille fois fausserait toute analyse statistique.
+        # tarif au poids, pas par tranche : une tranche donne le meme montant mille fois
+        ship_ht = r2(3.60 + 1.45 * kg)
         ship_vat = r2(ship_ht * VAT_STANDARD)
         total = r2(ht + vat + ship_ht + ship_vat)
-        B.post(day, "VE", f"{lines_fr}, {day.strftime('%d/%m')}",
-               f"{lines_en}, {day.strftime('%d/%m')}",
+        B.post(day, "VE", f"Commande en ligne {kg:.2f} kg, {day.strftime('%d/%m')}",
+               f"Online order {kg:.2f} kg, {day.strftime('%d/%m')}",
                [("512000", total, 0, None, "Encaissement Stripe"),
-                ("701000", 0, ht, "WEB", f"{kg:.1f} kg de cafe torrefie"),
-                ("708500", 0, ship_ht, "WEB", "Ports factures"),
+                ("701000", 0, ht, "WEB", f"{kg:.2f} kg de cafe torrefie"),
+                ("708500", 0, ship_ht, "WEB", "Port facture"),
                 ("445710", 0, vat, None, "TVA collectee 5,5 %"),
                 ("445710", 0, ship_vat, None, "TVA collectee 20 %")])
         state["vat_out"] += vat + ship_vat
     else:
         global invoice_no
-        name, city, siren, terms = random.choice(TRADE_CUSTOMERS)
+        name, city, siren, terms, lo, hi = random.choice(TRADE_CUSTOMERS)
+        # le volume vient du client, pas de l'appelant : c'est lui qui sait ce qu'il commande
+        kg = r2(random.uniform(lo, hi) * factor_of(day))
+        if state["fg_kg"] < kg:
+            return
+        ht = r2(kg * PRICES[centre])
+        vat = r2(ht * VAT_FOOD)
+        cost = r2(kg * STD_COST)
         total = r2(ht + vat)
         due = due_date(day, terms)
         invoice_no += 1
@@ -661,8 +693,6 @@ def monthly_costs(day: date, m: int) -> None:
 HOLIDAYS = {date(2026, 1, 1), date(2026, 4, 6), date(2026, 5, 1), date(2026, 5, 8),
             date(2026, 5, 14), date(2026, 5, 25), date(2026, 7, 14), date(2026, 8, 15)}
 
-SEASON = {1: .88, 2: .90, 3: .97, 4: 1.0, 5: 1.02, 6: .96, 7: .78, 8: .70, 9: 1.08}
-
 for m in range(1, 10):
     days = month_days(2026, m)
     factor = SEASON[m]
@@ -677,23 +707,24 @@ for m in range(1, 10):
         if d.day in (8, 22):
             buy_packaging(d)
 
-        sold_today = 0.0
         if wd < 5 or wd == 5:
-            kg = r2(random.uniform(12.5, 15.0) * factor)
-            sell(d, "BTQ", kg, counter=r2(random.uniform(95, 165) * factor))
-            sold_today += kg
+            sell(d, "BTQ", r2(random.uniform(9.5, 19.0) * factor),
+                 counter=r2(random.uniform(70, 210) * factor))
         if wd < 5:
-            kg = r2(random.uniform(14.5, 19.0) * factor)
-            sell(d, "WEB", kg)
-            sold_today += kg
-        if wd in (0, 2, 3):
-            kg = r2(random.uniform(225, 290) * factor)
-            sell(d, "GRO", kg)
-            sold_today += kg
+            # trois a huit commandes en ligne par jour, de 250 g a 4 kg
+            for _ in range(random.randint(2, 5)):
+                sell(d, "WEB", r2(random.uniform(0.25, 4.0)))
+        # deux a quatre livraisons professionnelles par jour ouvre, chaque client
+        # commandant selon son propre profil
+        if wd < 5:
+            for _ in range(random.randint(1, 3)):
+                sell(d, "GRO", 0)
 
         # roast to cover what leaves, plus a little to build the buffer back up
         if wd < 5:
-            cover = 937 * factor / 5 + (25 if state["fg_kg"] < 2_100 else 0)
+            # on ne torrefie pas la meme quantite tous les jours : le torrefacteur tourne
+            # selon les commandes du jour et la place disponible
+            cover = 900 * factor / 5 * random.uniform(.55, 1.5) + (25 if state["fg_kg"] < 2_100 else 0)
             roast(d, r2(cover))
 
         if wd == 0:

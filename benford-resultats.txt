@@ -1,0 +1,131 @@
+========================================================================
+TEST DE BENFORD, LIVRES DE LA BRULERIE DU CADRAN
+========================================================================
+3,613 ecritures, 10,460 lignes, montants de 0.38 a 146,000.00 EUR
+
+Premier chiffre, toutes les lignes du journal  (10,460 montants)
+  chiffre   observe      attendu      ecart
+    1      35.96 %      30.10 %    +5.85  ##############################
+    2      16.24 %      17.61 %    -1.37  ##############
+    3      11.07 %      12.49 %    -1.42  #########
+    4       8.41 %       9.69 %    -1.28  #######
+    5       6.82 %       7.92 %    -1.10  ######
+    6       5.51 %       6.69 %    -1.19  #####
+    7       5.32 %       5.80 %    -0.48  ####
+    8       5.65 %       5.12 %    +0.53  #####
+    9       5.03 %       4.58 %    +0.45  ####
+  khi deux   217.55   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.01520   non conformite
+
+Deuxieme chiffre, toutes les lignes du journal  (10,460 montants)
+  chiffre   observe      attendu      ecart
+    0      11.21 %      11.97 %    -0.75  #########
+    1      10.98 %      11.39 %    -0.41  #########
+    2      10.91 %      10.88 %    +0.03  #########
+    3      10.70 %      10.43 %    +0.26  #########
+    4      10.31 %      10.03 %    +0.28  #########
+    5      10.52 %       9.67 %    +0.85  #########
+    6       9.89 %       9.34 %    +0.56  ########
+    7       8.54 %       9.04 %    -0.50  #######
+    8       9.31 %       8.76 %    +0.55  ########
+    9       7.64 %       8.50 %    -0.86  ######
+  khi deux    34.98   (critique a 5 % : 16.919)  ecart significatif
+  MAD       0.00505   conformite etroite
+
+Premier chiffre, montants distincts seulement  (4,933 montants)
+  chiffre   observe      attendu      ecart
+    1      34.38 %      30.10 %    +4.28  #############################
+    2      16.89 %      17.61 %    -0.72  ##############
+    3      11.64 %      12.49 %    -0.86  ##########
+    4       9.06 %       9.69 %    -0.63  ########
+    5       7.36 %       7.92 %    -0.56  ######
+    6       6.00 %       6.69 %    -0.69  #####
+    7       5.21 %       5.80 %    -0.59  ####
+    8       4.87 %       5.12 %    -0.25  ####
+    9       4.60 %       4.58 %    +0.03  ####
+  khi deux    45.44   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.00956   conformite acceptable
+
+Premier chiffre, journal VE  (4,310 montants)
+  chiffre   observe      attendu      ecart
+    1      27.75 %      30.10 %    -2.35  #######################
+    2      10.67 %      17.61 %    -6.94  #########
+    3       9.68 %      12.49 %    -2.82  ########
+    4      11.14 %       9.69 %    +1.45  #########
+    5       9.58 %       7.92 %    +1.66  ########
+    6       7.19 %       6.69 %    +0.50  ######
+    7       8.19 %       5.80 %    +2.39  #######
+    8       8.82 %       5.12 %    +3.70  #######
+    9       6.98 %       4.58 %    +2.41  ######
+  khi deux   391.61   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.02691   non conformite
+
+Premier chiffre, journal BQ  (932 montants)
+  chiffre   observe      attendu      ecart
+    1      26.72 %      30.10 %    -3.39  ######################
+    2      18.78 %      17.61 %    +1.17  ################
+    3      13.84 %      12.49 %    +1.35  ############
+    4      11.70 %       9.69 %    +2.00  ##########
+    5       8.58 %       7.92 %    +0.67  #######
+    6       8.69 %       6.69 %    +2.00  #######
+    7       4.83 %       5.80 %    -0.97  ####
+    8       3.11 %       5.12 %    -2.00  ###
+    9       3.76 %       4.58 %    -0.82  ###
+  khi deux    25.76   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.01596   non conformite
+
+Premier chiffre, journal CA  (1,204 montants)
+  chiffre   observe      attendu      ecart
+    1      35.88 %      30.10 %    +5.78  ##############################
+    2      17.94 %      17.61 %    +0.33  ###############
+    3      12.46 %      12.49 %    -0.04  ##########
+    4      10.88 %       9.69 %    +1.19  #########
+    5       8.55 %       7.92 %    +0.64  #######
+    6       5.07 %       6.69 %    -1.63  ####
+    7       3.41 %       5.80 %    -2.39  ###
+    8       3.32 %       5.12 %    -1.79  ###
+    9       2.49 %       4.58 %    -2.08  ##
+  khi deux    51.46   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.01763   non conformite
+
+Premier chiffre, journal ST  (3,696 montants)
+  chiffre   observe      attendu      ecart
+    1      48.70 %      30.10 %   +18.60  #########################################
+    2      21.48 %      17.61 %    +3.87  ##################
+    3      11.42 %      12.49 %    -1.08  ##########
+    4       3.08 %       9.69 %    -6.61  ###
+    5       2.38 %       7.92 %    -5.54  ##
+    6       2.60 %       6.69 %    -4.10  ##
+    7       2.54 %       5.80 %    -3.26  ##
+    8       3.52 %       5.12 %    -1.60  ###
+    9       4.27 %       4.58 %    -0.30  ####
+  khi deux   948.61   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.04994   non conformite
+
+Premier chiffre, comptes de produits  (2,106 montants)
+  chiffre   observe      attendu      ecart
+    1      15.57 %      30.10 %   -14.53  #############
+    2       9.64 %      17.61 %    -7.97  ########
+    3      10.11 %      12.49 %    -2.38  ########
+    4      13.58 %       9.69 %    +3.89  ###########
+    5      10.78 %       7.92 %    +2.86  #########
+    6      10.35 %       6.69 %    +3.66  #########
+    7      11.73 %       5.80 %    +5.93  ##########
+    8      11.92 %       5.12 %    +6.80  ##########
+    9       6.32 %       4.58 %    +1.74  #####
+  khi deux   662.03   (critique a 5 % : 15.507)  ecart significatif
+  MAD       0.05529   non conformite
+
+========================================================================
+LECTURE
+========================================================================
+
+La loi de Benford suppose des montants qui couvrent plusieurs ordres de grandeur
+et qui naissent de processus multiplicatifs. Un journal complet remplit en general
+cette condition : il melange des ventes de 40 EUR et des immobilisations de 146 000.
+
+Une population etroite ne la remplit pas. Des ventes de detail toutes comprises
+entre 300 et 450 EUR commenceront presque toutes par 3 ou 4, et Benford les
+rejettera sans qu'il y ait la moindre anomalie. C'est une limite du test, pas une
+fraude : il se lit en connaissant la population.
+
