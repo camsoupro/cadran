@@ -789,6 +789,105 @@ for m in range(1, 10):
             pay_suppliers(d)
     monthly_costs(days[-1], m)
 
+
+# ----------------------------------------------------------------- suivi des activites
+# Tout ce qui se passe dans une entreprise ne se comptabilise pas. Un devis recu n'est
+# pas une charge, un rendez-vous pris n'est rien du tout : seule la facture cree le fait
+# generateur. Ce journal de bord garde la trace du reste, et pointe vers l'ecriture le
+# jour ou il y en a une.
+ACTIVITIES = [
+    {
+        "id": "ACT-01", "status": "done", "category": "maintenance",
+        "fr": "Fuite sur la tuyauterie du torrefacteur",
+        "en": "Leak on the roaster pipework",
+        "opened": "2026-09-03",
+        "updates": [
+            {"date": "2026-09-03", "fr": "Fuite constatee sous la conduite de vapeur au demarrage du brassin du matin. Production poursuivie avec un seau.",
+             "en": "Leak found under the steam line when starting the morning batch. Kept roasting with a bucket underneath.", "entry": None},
+            {"date": "2026-09-03", "fr": "Rendez-vous pris avec un plombier pour le 5 septembre.",
+             "en": "Appointment booked with a plumber for 5 September.", "entry": None},
+            {"date": "2026-09-05", "fr": "Visite faite. Devis annonce sous 24 heures.",
+             "en": "Visit done. Quote promised within 24 hours.", "entry": None},
+            {"date": "2026-09-06", "fr": "Devis recu, 640 EUR HT. Aucune ecriture : un devis n'engage rien tant qu'il n'est pas accepte et facture.",
+             "en": "Quote received, 640 EUR net. No entry: a quote commits nothing until it is accepted and invoiced.", "entry": None},
+            {"date": "2026-09-08", "fr": "Le plombier annule, il ne prend plus de chantier avant octobre. Retour a la case depart.",
+             "en": "The plumber cancels, no new jobs before October. Back to square one.", "entry": None},
+            {"date": "2026-09-10", "fr": "Second prestataire trouve par la voisine torrefactrice, intervention calee au 14.",
+             "en": "Second contractor found through the roaster next door, work booked for the 14th.", "entry": None},
+            {"date": "2026-09-14", "fr": "Reparation faite, facture 480 EUR HT. La voila, l'ecriture.",
+             "en": "Repair done, invoice 480 EUR net. There is the entry.", "entry": "AC"},
+            {"date": "2026-09-30", "fr": "Facture reglee par virement.",
+             "en": "Invoice paid by transfer.", "entry": "BQ"},
+        ],
+    },
+    {
+        "id": "ACT-02", "status": "waiting", "category": "client",
+        "fr": "Cantine Numerique ne regle plus ses factures",
+        "en": "Cantine Numerique has stopped paying",
+        "opened": "2026-06-30",
+        "updates": [
+            {"date": "2026-06-30", "fr": "Premiere facture echue non reglee. Relance telephonique, promesse de virement.",
+             "en": "First invoice past due. Called them, transfer promised.", "entry": None},
+            {"date": "2026-07-31", "fr": "Deuxieme echeance passee. Relance ecrite envoyee.",
+             "en": "Second due date passed. Written reminder sent.", "entry": None},
+            {"date": "2026-08-20", "fr": "Contact impossible depuis trois semaines. Livraisons suspendues.",
+             "en": "No contact for three weeks. Deliveries suspended.", "entry": None},
+            {"date": "2026-09-30", "fr": "Creance passee en clients douteux et depreciee a la cloture. Cette fois, cela touche le resultat.",
+             "en": "Receivable moved to doubtful customers and written down at closing. This time it hits the result.", "entry": "OD"},
+        ],
+    },
+    {
+        "id": "ACT-03", "status": "planned", "category": "bail",
+        "fr": "Renegociation du bail de l'atelier",
+        "en": "Workshop lease renegotiation",
+        "opened": "2026-09-12",
+        "updates": [
+            {"date": "2026-09-12", "fr": "Le bail arrive a echeance en mars. Objectif : passer de 2 480 a 2 100 EUR par mois.",
+             "en": "The lease ends in March. Target: from 2 480 down to 2 100 EUR a month.", "entry": None},
+            {"date": "2026-09-22", "fr": "Courrier envoye au bailleur, reponse attendue sous un mois.",
+             "en": "Letter sent to the landlord, answer expected within a month.", "entry": None},
+        ],
+    },
+    {
+        "id": "ACT-04", "status": "open", "category": "materiel",
+        "fr": "Le moulin de la boutique chauffe",
+        "en": "The shop grinder is running hot",
+        "opened": "2026-09-24",
+        "updates": [
+            {"date": "2026-09-24", "fr": "Odeur de brule apres vingt minutes d'affilee. Meules a changer, probablement.",
+             "en": "Burning smell after twenty minutes of use. Burrs probably need replacing.", "entry": None},
+            {"date": "2026-09-26", "fr": "Devis demande a deux fournisseurs, rien recu pour l'instant.",
+             "en": "Quotes requested from two suppliers, nothing received yet.", "entry": None},
+        ],
+    },
+    {
+        "id": "ACT-05", "status": "done", "category": "equipe",
+        "fr": "Recrutement d'un apprenti torrefacteur",
+        "en": "Hiring an apprentice roaster",
+        "opened": "2026-04-02",
+        "updates": [
+            {"date": "2026-04-02", "fr": "Annonce deposee au CFA. Objectif : septembre.",
+             "en": "Advert posted with the training centre. Target: September.", "entry": None},
+            {"date": "2026-06-18", "fr": "Trois candidats recus, un retenu.",
+             "en": "Three candidates seen, one chosen.", "entry": None},
+            {"date": "2026-09-01", "fr": "Arrivee dans l'equipe. Le cout apparait dans la paie du mois.",
+             "en": "Joined the team. The cost shows up in the month's payroll.", "entry": "PA"},
+        ],
+    },
+    {
+        "id": "ACT-06", "status": "cancelled", "category": "commercial",
+        "fr": "Marche de Noel de la place Bellecour",
+        "en": "Christmas market stall",
+        "opened": "2026-08-20",
+        "updates": [
+            {"date": "2026-08-20", "fr": "Dossier de candidature depose pour un chalet en decembre.",
+             "en": "Application filed for a chalet in December.", "entry": None},
+            {"date": "2026-09-18", "fr": "Candidature refusee, faute de place. Aucune consequence comptable : rien n'avait ete engage.",
+             "en": "Application refused, no space left. No accounting consequence: nothing had been committed.", "entry": None},
+        ],
+    },
+]
+
 # ----------------------------------------------------------------- cloture, depreciations
 
 DOUBTFUL_AFTER = 60          # jours de retard au dela desquels la creance est douteuse
@@ -1010,7 +1109,27 @@ def build() -> dict:
         "exposure_total": r2(sum(exposure.values())),
     }
 
+    # on relie les mises a jour du suivi a une vraie ecriture, quand elle existe
+    by_journal = {}
+    for e in B.entries:
+        by_journal.setdefault(e["journal"], []).append(e)
+    activities = []
+    for a in ACTIVITIES:
+        ups = []
+        for u in a["updates"]:
+            entry = None
+            if u["entry"]:
+                same_day = [e for e in by_journal.get(u["entry"], []) if e["date"] == u["date"]]
+                pool = same_day or by_journal.get(u["entry"], [])
+                if pool:
+                    entry = pool[-1]["number"]
+            ups.append({**u, "entry": entry})
+        activities.append({**a, "updates": ups,
+                           "posted": sum(1 for u in ups if u["entry"]),
+                           "last": ups[-1]["date"]})
+
     return {
+        "activities": activities,
         "per100": per100,
         "payables": {
             "open": open_bills, "total": r2(sum(b["amount"] for b in open_bills)),

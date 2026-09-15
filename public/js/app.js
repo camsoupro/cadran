@@ -17,7 +17,9 @@ let D = null;
 let cleanup = null;
 
 const NAV = [
-  ["navRecord", [["record", "pRecord"]]],
+  ["navRecord", [["record", "pRecord"],
+    ["activity", "pActivity", d => String((d.activities || []).filter(
+      a => a.status === "open" || a.status === "waiting").length)]]],
   ["navBooks", [["", "pOverview"], ["journal", "pJournal", d => num(d.meta.entries, 0)],
     ["ledger", "pLedger", d => num(d.accounts.filter(a => a.debit || a.credit).length, 0)],
     ["trial", "pTrial"]]],

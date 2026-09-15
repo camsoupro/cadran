@@ -350,3 +350,27 @@ tr.head-row td{padding-top:20px; font-family:var(--serif); font-size:15px}
   .topline h1{font-size:18px}
   .chip{font-size:11px; padding:5px 9px}
 }
+
+/* ---------- suivi des activites ---------- */
+.acts{display:flex; flex-direction:column; gap:0; margin-top:8px}
+.act{padding:24px 0; border-bottom:1px solid var(--line-2)}
+.act:last-child{border-bottom:0}
+.act-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+.act-head h3{font-family:var(--serif); font-weight:400; font-size:19px; margin:0}
+.act-meta{margin-left:auto}
+.act-line{list-style:none; margin:0; padding:0 0 0 18px; border-left:1px solid var(--line)}
+.act-line li{display:grid; grid-template-columns:104px 1fr auto; gap:16px; align-items:baseline;
+  padding:9px 0; position:relative}
+.act-line li::before{content:""; position:absolute; left:-23px; top:15px; width:9px; height:9px;
+  border-radius:50%; background:var(--paper); border:1.5px solid var(--line)}
+.act-line li:last-child::before{border-color:var(--accent); background:var(--accent)}
+.act-date{white-space:nowrap}
+.act-text{font-size:13px; line-height:1.65; color:var(--ink-2)}
+.act-entry{font-family:var(--mono); font-size:11px; color:var(--accent); text-decoration:none;
+  border:1px solid var(--accent); border-radius:99px; padding:3px 9px; white-space:nowrap}
+.act-none{font-size:9.5px; white-space:nowrap; opacity:.7}
+@media (max-width:560px){
+  .act-line li{grid-template-columns:1fr; gap:4px}
+  .act-line li::before{top:12px}
+  .act-meta{margin-left:0; width:100%}
+}

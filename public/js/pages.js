@@ -840,6 +840,17 @@ function exportsPage(D) {
 
 const RECIPES = [
   {
+    match: ["fuite", "leak", "rendez-vous", "plombier", "plumber", "devis", "quote"],
+    fr: "la tuyauterie du torréfacteur fuit, rendez-vous pris avec un plombier",
+    en: "the roaster pipework is leaking, appointment booked with a plumber",
+    event: ["Suivi d'activité, aucun mouvement comptable", "Activity log, no accounting movement"],
+    rule: ["Rien n'est encore engagé : ni facture, ni paiement. L'information part dans le suivi, pas dans le journal.",
+      "Nothing is committed yet: no invoice, no payment. This goes to the activity log, not to the journal."],
+    lines: [],
+    note: ["Le jour où le plombier facture, la phrase « reçu la facture du plombier, 480 € » créera l'écriture. C'est la facture qui compte, pas le devis.",
+      "The day the plumber invoices, the sentence \"received the plumber invoice, 480 EUR\" will create the entry. It is the invoice that counts, not the quote."],
+  },
+  {
     match: ["vendu", "sold", "kg au", "kg to"],
     credit: true,
     fr: "vendu 12 kg au Café des Artisans", en: "sold 12 kg to Cafe des Artisans",
@@ -960,7 +971,8 @@ function record(D, go) {
     const td = recipe.lines.reduce((s2, l) => s2 + l[2], 0);
     const tc = recipe.lines.reduce((s2, l) => s2 + l[3], 0);
     const credit = recipe.credit === true;
-    result.append(
+    // append transforme une valeur nulle en texte "null" : on filtre avant
+    const parts = [
       h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("rUnderstood") }),
       h("div", { class: "chips", style: { marginTop: 0 } },
         h("span", { class: "chip" }, t("cDate"), " ", h("b", { text: date(when.value, true) })),
@@ -968,8 +980,10 @@ function record(D, go) {
         credit ? h("span", { class: "chip" }, t("cDue"), " ",
           h("b", { text: date(dueDate(when.value, termsSel.value), true) })) : null,
         h("span", { class: "chip" }, t("rRule"), " ", h("b", { text: pick(recipe.rule[0], recipe.rule[1]) }))),
-      h("p", { class: "caps", style: { margin: "22px 0 10px" }, text: t("rProposed") }),
-      table([
+      recipe.lines.length ? h("p", { class: "caps", style: { margin: "22px 0 10px" }, text: t("rProposed") }) : null,
+      !recipe.lines.length
+        ? h("p", { class: "reading", style: { marginTop: "18px" }, html: pick(recipe.note[0], recipe.note[1]) })
+        : table([
         { label: t("cAccount"), c: true, render: l => l[0] },
         { label: t("cLabel"), render: l => l[1] },
         { label: t("cDebit"), n: true, render: l => l[2] ? num(l[2]) : "" },
@@ -978,7 +992,9 @@ function record(D, go) {
         foot: h("tr", {}, h("td", {}), h("td", { text: t("cTotals") }),
           h("td", { class: "n", text: num(td) }), h("td", { class: "n", text: num(tc) })),
       }),
-      h("p", { class: "readonly" }, badge(t("readOnly")), t("rNotSaved")));
+      h("p", { class: "readonly" }, badge(t("readOnly")), t("rNotSaved")),
+    ];
+    result.append(...parts.filter(Boolean));
   };
 
   const run = () => {
@@ -1256,6 +1272,55 @@ async function analysis(D, go) {
   return { node: root, cleanup: () => { if (dispose) dispose(); } };
 }
 
+
+// ============================================================== activity log
+
+const ACT_STATUS = {
+  open: ["actStOpen", ""], planned: ["actStPlanned", ""], waiting: ["actStWaiting", "late"],
+  done: ["actStDone", "ok"], cancelled: ["actStCancelled", ""],
+};
+const ACT_CAT = {
+  maintenance: "actCatMaintenance", client: "actCatClient", bail: "actCatBail",
+  materiel: "actCatMateriel", equipe: "actCatEquipe", commercial: "actCatCommercial",
+};
+
+function activity(D, go) {
+  const list = D.activities || [];
+  const open = list.filter(a => a.status === "open" || a.status === "waiting").length;
+  const done = list.filter(a => a.status === "done").length;
+  const posted = list.reduce((n, a) => n + a.posted, 0);
+
+  const card = a => {
+    const [key, cls] = ACT_STATUS[a.status] || ["actStOpen", ""];
+    return h("div", { class: "act" },
+      h("div", { class: "act-head" },
+        h("h3", { text: pick(a.fr, a.en) }),
+        badge(t(key), cls),
+        h("span", { class: "caps", text: t(ACT_CAT[a.category] || "actCatMaintenance") }),
+        h("span", { class: "act-meta caps" },
+          t("actOpened") + " " + dateAuto(a.opened) + " · " + t("actUpdates", { n: a.updates.length }))),
+      h("ol", { class: "act-line" }, a.updates.map(u =>
+        h("li", {},
+          h("span", { class: "act-date caps", text: dateAuto(u.date) }),
+          h("span", { class: "act-text", html: pick(u.fr, u.en) }),
+          u.entry
+            ? h("a", { class: "act-entry", href: "#/journal", title: t("actEntry") }, u.entry)
+            : h("span", { class: "act-none caps", text: t("actNoEntry") })))));
+  };
+
+  return {
+    node: h("div", {},
+      section(t("actTitle"), null, reading(t("actRead")),
+        h("div", { class: "figs" },
+          figure(t("actCountOpen"), String(open), t("actNoteOpen", { n: list.length })),
+          figure(t("actCountDone"), String(done), t("actNoteDone")),
+          figure(t("actCountPosted"), String(posted), t("actNotePosted")),
+          figure(t("cTotal"), String(list.length), t("actNoteAll"))),
+        h("div", { class: "acts" }, list.map(card)),
+        callout(t("actWhy"), t("actWhyText")))),
+  };
+}
+
 // ============================================================== registry
 
 export const PAGES = {
@@ -1275,5 +1340,6 @@ export const PAGES = {
   "reminders": { title: "pReminders", crumb: "navManagement", render: reminders },
   "payables": { title: "pPayables", crumb: "navManagement", render: payables },
   "analysis": { title: "pAnalysis", crumb: "navLearn", render: analysis },
+  "activity": { title: "pActivity", crumb: "navRecord", render: activity },
   "exports": { title: "pExports", crumb: "navStatements", render: exportsPage },
 };
