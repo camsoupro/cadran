@@ -33,6 +33,75 @@ export const STR = {
   pInventory: ["Stocks", "Inventory"],
   pReceivables: ["Créances clients", "Receivables"],
   pExports: ["Exports", "Exports"],
+  pInvoices: ["Factures", "Invoices"],
+  pReminders: ["Relances", "Reminders"],
+
+  // ---------------------------------------------------------------- factures
+  invTitleFac: ["Factures clients", "Customer invoices"],
+  invReadFac: [
+    "Les {n} factures émises aux professionnels depuis le 1er janvier. Les particuliers, en boutique et en ligne, paient comptant : ils reçoivent un ticket, pas une facture. Chaque facture porte un numéro d'une séquence continue, sans trou, et renvoie à l'écriture qui l'a comptabilisée. Cliquez une ligne pour voir la facture telle qu'elle est éditée.",
+    "The {n} invoices issued to trade customers since 1 January. Retail and online customers pay immediately: they get a receipt, not an invoice. Each invoice carries a number from an unbroken sequence and points to the entry that recorded it. Click a row to see the invoice as it is issued."],
+  cInvoice: ["Facture", "Invoice"],
+  cTerms: ["Délai de paiement", "Payment terms"],
+  cStatus: ["État", "Status"],
+  cHT: ["Total HT", "Net"],
+  cVAT: ["TVA", "VAT"],
+  cTTC: ["Total TTC", "Gross"],
+  stPaid: ["Réglée", "Paid"],
+  stOpen: ["En attente", "Outstanding"],
+  stLate: ["En retard", "Overdue"],
+  facSupplier: ["Émetteur", "Issued by"],
+  facCustomer: ["Client", "Bill to"],
+  facDesignation: ["Désignation", "Description"],
+  facQty: ["Quantité", "Quantity"],
+  facUnit: ["Prix unitaire HT", "Unit price"],
+  facLine: ["Café torréfié, {blend}, en sacs de 1 kg", "Roasted coffee, {blend}, in 1 kg bags"],
+  facDue: ["À régler avant le", "Payable by"],
+  facEntry: ["Comptabilisée sous", "Posted as"],
+  facPrint: ["Imprimer", "Print"],
+  facBack: ["Retour à la liste", "Back to the list"],
+  facLegal: [
+    "Pénalités de retard : taux directeur de la Banque centrale européenne majoré de dix points, soit {rate} % l'an. Indemnité forfaitaire pour frais de recouvrement : {fee} (articles L441-10 et D441-5 du code de commerce). Pas d'escompte pour paiement anticipé. TVA acquittée sur les débits.",
+    "Late payment interest: the European Central Bank refinancing rate plus ten points, that is {rate} % a year. Fixed recovery charge: {fee} (French commercial code, articles L441-10 and D441-5). No discount for early settlement. VAT accounted for on invoice."],
+  facMentions: ["Mentions obligatoires", "Statutory particulars"],
+
+  // ---------------------------------------------------------------- relances
+  remTitle: ["Relances clients", "Payment reminders"],
+  remRead: [
+    "Les factures dont l'échéance est passée au 30 septembre. Le retard se compte à partir de la date d'échéance, qui dépend du délai accordé : un délai de 30 jours fin de mois n'est pas un délai de 30 jours. Les pénalités sont calculées au taux légal, jour par jour, et l'indemnité de 40 € est due dès le premier jour de retard.",
+    "The invoices past due at 30 September. Lateness runs from the due date, which depends on the terms granted: 30 days end of month is not the same as 30 days. Interest is computed at the statutory rate, day by day, and the 40 EUR fixed charge falls due on the first day of delay."],
+  remNone: ["Aucune facture en retard au 30 septembre.", "No invoice is past due at 30 September."],
+  remLetter: ["La lettre qui partirait", "The letter that would go out"],
+  remPenalty: ["Pénalités", "Interest"],
+  remFee: ["Indemnité", "Fixed charge"],
+  remClaim: ["Total réclamable", "Total claimable"],
+  remNotSent: [
+    "Démonstration : rien ne s'envoie. Dans l'application réelle, cette lettre part par courriel et l'envoi est daté dans le dossier du client.",
+    "Demonstration: nothing is sent. In the real application this letter goes out by e-mail and the send is dated in the customer file."],
+  remPick: ["Choisissez une facture pour voir la lettre.", "Pick an invoice to see the letter."],
+  remBody: [
+    "Madame, Monsieur,\n\nSauf erreur de notre part, la facture {ref} du {date}, d'un montant de {amount}, est échue depuis le {due}, soit {days} jours.\n\nNous vous remercions de bien vouloir procéder à son règlement sous huitaine. À défaut, les pénalités de retard prévues à nos conditions de vente, soit {penalty} à ce jour, ainsi que l'indemnité forfaitaire de recouvrement de {fee}, seront exigibles.\n\nSi ce règlement a été effectué entre-temps, merci de ne pas tenir compte de ce courrier.\n\nVeuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.\n\nLa Brûlerie du Cadran",
+    "Dear Sir or Madam,\n\nUnless we are mistaken, invoice {ref} dated {date}, for {amount}, fell due on {due}, that is {days} days ago.\n\nWe would be grateful if you could settle it within eight days. Failing that, the late payment interest set out in our terms, {penalty} as of today, together with the fixed recovery charge of {fee}, will become payable.\n\nIf payment has been made in the meantime, please disregard this letter.\n\nYours faithfully,\n\nLa Brulerie du Cadran"],
+
+  // ---------------------------------------------------------------- creances, ajouts
+  recDso: ["Délai moyen de règlement constaté", "Average days to payment"],
+  recDsoNote: ["sur les {n} factures réglées à ce jour", "over the {n} invoices settled so far"],
+  recLateTotal: ["Encours échu", "Past due"],
+  recPenalties: ["Pénalités et indemnités exigibles", "Interest and charges claimable"],
+  recTermsNote: [
+    "Les délais accordés vont du comptant au 45 jours fin de mois, le maximum que la loi française autorise.",
+    "Terms granted run from payment on receipt to 45 days end of month, the maximum French law allows."],
+
+  // ---------------------------------------------------------------- bac a sable, ajouts
+  rWhen: ["Date de l'opération", "Date of the transaction"],
+  rWhenNote: [
+    "Dans l'application réelle, le modèle lit la date dans votre phrase : lundi 14/09, hier, le 3 septembre. Ici, tapez-la dans le champ.",
+    "In the real application the model reads the date from your sentence: last Monday, yesterday, 3 September. Here, type it in the field."],
+  rTermsField: ["Délai accordé", "Terms granted"],
+  rComputedDue: ["Échéance calculée", "Computed due date"],
+  rDueExplain: [
+    "Un délai de {terms} appliqué à une facture du {date} donne le {due}.",
+    "Terms of {terms} applied to an invoice dated {date} give {due}."],
 
   // ---------------------------------------------------------------- overview
   ovTitle: ["L'année est courte de", "The year is short by"],
@@ -60,8 +129,8 @@ export const STR = {
 
   ovFinding: ["Le point qui décide de l'année", "The one figure that decides the year"],
   ovFindingText: [
-    "L'atelier a consommé {excess} kg de café vert de plus que le standard n'autorise pour cette production : un rendement réel de {real} % contre {std} % retenu dans le coût standard. Cet écart de quantité coûte {qty}. À côté, le café vert a été payé {avg} le kilo au lieu de {stdp} : cet écart de prix coûte {price}. Les deux réunis valent plus de deux fois la perte de l'exercice, et aucun des deux n'est un problème commercial.",
-    "The workshop used {excess} kg of green coffee more than the standard allows for this output: a real yield of {real} % against the {std} % built into the standard cost. That quantity variance costs {qty}. Alongside it, green coffee was paid {avg} a kilo instead of {stdp}: that price variance costs {price}. Together they are worth more than twice the loss for the period, and neither of them is a commercial problem."],
+    "L'atelier a consommé {excess} kg de café vert de plus que le standard n'autorise pour cette production : un rendement réel de {real} % contre {std} % retenu dans le coût standard. Cet écart de quantité coûte {qty}. À côté, le café vert a été payé {avg} le kilo au lieu de {stdp} : cet écart de prix coûte {price}. Ensemble, <b>ils expliquent {share} % de la perte de l'exercice</b>, et aucun des deux n'est un problème commercial.",
+    "The workshop used {excess} kg of green coffee more than the standard allows for this output: a real yield of {real} % against the {std} % built into the standard cost. That quantity variance costs {qty}. Alongside it, green coffee was paid {avg} a kilo instead of {stdp}: that price variance costs {price}. Together <b>they account for {share} % of the loss for the period</b>, and neither of them is a commercial problem."],
   ovSeeProduction: ["Voir le détail par brassin", "See it batch by batch"],
 
   ovMonths: ["Neuf mois", "Nine months"],
@@ -353,8 +422,8 @@ export const STR = {
     "Le coût standard retient {std} % de rendement. Le réel est de {real} %. Pour {roasted} kg de café torréfié, le standard autorisait {allowed} kg de vert ; l'atelier en a consommé {used} kg. Les {excess} kg de trop, valorisés au prix standard, sont l'<b>écart sur quantité</b> : {qty}.",
     "The standard assumes a {std} % yield. The real one is {real} %. For {roasted} kg of roasted coffee the standard allowed {allowed} kg of green; the workshop used {used} kg. The {excess} kg too many, valued at the standard price, are the <b>quantity variance</b>: {qty}."],
   tu6b: [
-    "Le café vert a par ailleurs été payé {avg} le kilo au lieu des {stdp} du standard : c'est l'<b>écart sur prix</b>, {price}. Additionnés, ces deux écarts valent {total}, quand la perte de l'exercice n'est que de {loss}. Un compte de résultat seul ne dit pas cela : il montre la perte, pas ses deux causes.",
-    "Green coffee was also paid {avg} a kilo instead of the {stdp} in the standard: that is the <b>price variance</b>, {price}. Added together the two variances are worth {total}, when the loss for the period is only {loss}. An income statement alone does not tell you this: it shows the loss, not its two causes."],
+    "Le café vert a par ailleurs été payé {avg} le kilo au lieu des {stdp} du standard : c'est l'<b>écart sur prix</b>, {price}. Additionnés, ces deux écarts valent {total}, soit {share} % de la perte de l'exercice, qui est de {loss}. Un compte de résultat seul ne dit pas cela : il montre la perte, pas ses causes.",
+    "Green coffee was also paid {avg} a kilo instead of the {stdp} in the standard: that is the <b>price variance</b>, {price}. Added together the two variances are worth {total}, that is {share} % of the loss for the period, which stands at {loss}. An income statement alone does not tell you this: it shows the loss, not its causes."],
   tu7t: ["Les états financiers", "The statements"],
   tu7a: [
     "Le compte de résultat additionne les classes 6 et 7 : il répond à la question « a-t-on gagné de l'argent ». Le bilan photographie les classes 1 à 5 au dernier jour : il répond à « que possède-t-on, et à qui ».",

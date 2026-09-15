@@ -106,6 +106,7 @@ async function overview(D, go) {
       price: money(p.variance_price),
       avg: money(p.avg_green_price),
       stdp: money(p.std_green),
+      share: num(p.variance / Math.abs(i.net) * 100, 0),
     })),
     h("p", { style: { marginTop: "16px" } },
       h("a", { href: "#/production", class: "btn primary", text: t("ovSeeProduction") })));
@@ -504,6 +505,7 @@ function production(D) {
             excess: num(p.excess_green, 0), real: num(p.yield * 100, 1),
             std: num(p.std_yield * 100, 0), qty: money(p.variance_qty),
             price: money(p.variance_price), avg: money(p.avg_green_price), stdp: money(p.std_green),
+            share: num(p.variance / Math.abs(i.net) * 100, 0),
           })))),
         h("p", { class: "caps", style: { margin: "34px 0 10px" }, text: t("prTable") }),
         bTable)),
@@ -539,7 +541,7 @@ function inventory(D) {
 
 // ============================================================== receivables
 
-function receivables(D) {
+function receivables(D, go) {
   const r = D.receivables;
   const buckets = [
     { key: "current", label: t("recCurrent"), tone: "pos" },
@@ -549,12 +551,23 @@ function receivables(D) {
     { key: "over", label: t("recOver"), tone: "neg" },
   ].map(b => ({ ...b, value: r.ageing[b.key] || 0 }));
 
-  const band = h("div", { style: { position: "relative", height: "8px", borderRadius: "99px", overflow: "hidden", background: "var(--sunk)", marginBottom: "18px" } });
+  const band = h("div", { style: { position: "relative", height: "8px", borderRadius: "99px",
+    overflow: "hidden", background: "var(--sunk)", marginBottom: "18px" } });
   ageing(band, buckets);
+
+  const figs = h("div", { class: "figs" },
+    figure(t("cTotal"), money(r.total, { compact: true }), t("recOpen")),
+    figure(t("recLateTotal"), money(r.late_total, { compact: true }),
+      t("recPenalties"), r.late_total ? "neg" : ""),
+    figure(t("recDso"), num(r.dso, 1) + " " + pick("jours", "days"),
+      t("recDsoNote", { n: num(r.paid_count, 0) })),
+    figure(t("remPenalty"), money(r.penalties), t("facLegal", {
+      rate: num(r.late_rate * 100, 2), fee: money(r.fee) }).split(".")[0], "warn"));
 
   return {
     node: h("div", {},
-      section(t("recTitle"), null, reading(t("recRead")),
+      section(t("recTitle"), null, reading(t("recRead")), figs,
+        h("p", { class: "reading", style: { marginTop: "26px" }, text: t("recTermsNote") }),
         h("div", { class: "two" },
           h("div", {},
             h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("recAgeing") }),
@@ -563,16 +576,168 @@ function receivables(D) {
           h("div", {},
             h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("recOpen") }),
             table([
+              { label: t("cInvoice"), c: true, render: o => o.invoice || o.entry },
               { label: t("cCustomer"), render: o => o.customer },
-              { label: t("cEntry"), c: true, render: o => o.entry },
+              { label: t("cTerms"), render: o => pick(o.terms_fr, o.terms_en) },
               { label: t("cDue"), render: o => date(o.due) },
-              { label: t("recLate"), n: true, cls: o => o.late > 0 ? "neg" : "", render: o => o.late > 0 ? o.late + " " + t("recDays") : "-" },
+              { label: t("recLate"), n: true, cls: o => o.late > 0 ? "neg" : "",
+                render: o => o.late > 0 ? o.late + " " + t("recDays") : "-" },
               { label: t("cAmount"), n: true, render: o => num(o.amount) },
             ], r.open, {
-              foot: h("tr", {}, h("td", { colspan: 4, text: t("cTotal") }),
+              onRow: o => o.late > 0 ? go("#/reminders") : go("#/invoices"),
+              foot: h("tr", {}, h("td", { colspan: 5, text: t("cTotal") }),
                 h("td", { class: "n", text: num(r.total) })),
             }))))),
   };
+}
+
+// ============================================================== invoices
+
+function invoiceStatus(D, inv) {
+  const open = D.receivables.open.find(o => o.invoice === inv.ref);
+  if (!open) return { key: "stPaid", cls: "ok" };
+  return open.late > 0 ? { key: "stLate", cls: "late" } : { key: "stOpen", cls: "" };
+}
+
+function invoiceSheet(D, inv, go) {
+  const m = D.meta, r = D.receivables;
+  const open = D.receivables.open.find(o => o.invoice === inv.ref);
+  const terms = D.terms.find(x => x.code === inv.terms);
+  const line = (label, value, cls) => h("div", { class: "fac-row" },
+    h("span", { text: label }), h("span", { class: "n " + (cls || ""), text: value }));
+
+  return h("div", { class: "invoice" },
+    h("div", { class: "fac-head" },
+      h("div", {},
+        h("p", { class: "caps", text: t("facSupplier") }),
+        h("p", { class: "fac-strong", text: m.name }),
+        h("p", { class: "fac-small", html:
+          `${m.legal}<br>${m.address}<br>${m.postal}<br>SIREN ${m.siren} &middot; ${m.rcs}<br>` +
+          `${pick("TVA intracommunautaire", "VAT number")} ${m.vat} &middot; APE ${m.ape}` })),
+      h("div", { class: "fac-meta" },
+        h("p", { class: "caps", text: t("cInvoice") }),
+        h("p", { class: "fac-ref", text: inv.ref }),
+        h("p", { class: "fac-small", html:
+          `${t("cDate")} : ${date(inv.date, true)}<br>${t("facDue")} ${date(inv.due, true)}<br>` +
+          `${t("cTerms")} : ${pick(terms.fr, terms.en)}` }))),
+
+    h("div", { class: "fac-to" },
+      h("p", { class: "caps", text: t("facCustomer") }),
+      h("p", { class: "fac-strong", text: inv.customer }),
+      h("p", { class: "fac-small", html: `${inv.city}<br>SIREN ${inv.siren}` })),
+
+    table([
+      { label: t("facDesignation"), render: i2 => t("facLine", { blend: pick(i2.blend_fr, i2.blend_en) }) },
+      { label: t("facQty"), n: true, render: i2 => num(i2.kg, 1) + " kg" },
+      { label: t("facUnit"), n: true, render: i2 => num(i2.unit_price) },
+      { label: t("cVAT"), n: true, render: i2 => num(i2.vat_rate * 100, 1) + " %" },
+      { label: t("cHT"), n: true, render: i2 => num(i2.ht) },
+    ], [inv]),
+
+    h("div", { class: "fac-totals" },
+      line(t("cHT"), num(inv.ht)),
+      line(t("cVAT") + " " + num(inv.vat_rate * 100, 1) + " %", num(inv.vat)),
+      line(t("cTTC"), num(inv.total), "tot")),
+
+    h("div", { class: "fac-legal" },
+      h("p", { class: "caps", text: t("facMentions") }),
+      h("p", { text: t("facLegal", { rate: num(r.late_rate * 100, 2), fee: money(r.fee) }) }),
+      h("p", { class: "fac-small", html:
+        `${t("facEntry")} <b>${inv.entry}</b>${open ? "" : " &middot; " + t("stPaid").toLowerCase()}` })),
+
+    h("div", { class: "no-print", style: { marginTop: "20px", display: "flex", gap: "8px" } },
+      h("button", { class: "btn primary", text: t("facPrint"), onclick: () => print() }),
+      h("button", { class: "btn", text: t("facBack"), onclick: () => go("#/invoices") })));
+}
+
+function invoices(D, go) {
+  const root = h("div", {});
+  const detail = h("div", { style: { marginBottom: "26px" } });
+  const rows = D.invoices.slice().reverse();
+
+  const list = table([
+    { label: t("cInvoice"), c: true, render: i2 => i2.ref },
+    { label: t("cDate"), render: i2 => date(i2.date) },
+    { label: t("cCustomer"), render: i2 => i2.customer },
+    { label: t("cTerms"), render: i2 => { const x = D.terms.find(y => y.code === i2.terms); return pick(x.fr, x.en); } },
+    { label: t("cDue"), render: i2 => date(i2.due) },
+    { label: t("cHT"), n: true, render: i2 => num(i2.ht) },
+    { label: t("cTTC"), n: true, render: i2 => num(i2.total) },
+    { label: t("cStatus"), render: i2 => { const st = invoiceStatus(D, i2); return badge(t(st.key), st.cls); } },
+  ], rows, {
+    onRow: inv => {
+      detail.innerHTML = "";
+      detail.append(invoiceSheet(D, inv, go));
+      detail.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    foot: h("tr", {}, h("td", { colspan: 5, text: t("cTotals") }),
+      h("td", { class: "n", text: num(rows.reduce((a, b) => a + b.ht, 0)) }),
+      h("td", { class: "n", text: num(rows.reduce((a, b) => a + b.total, 0)) }),
+      h("td", {})),
+  });
+
+  list.classList.add("list-table");
+  detail.append(invoiceSheet(D, rows[0], go));
+  root.append(section(t("invTitleFac"), null,
+    reading(t("invReadFac", { n: num(D.invoices.length, 0) })), detail, list));
+  return { node: root };
+}
+
+// ============================================================== reminders
+
+function reminders(D, go) {
+  const r = D.receivables;
+  const late = r.open.filter(o => o.late > 0);
+  const root = h("div", {});
+  const letterBox = h("div", {});
+
+  if (!late.length) {
+    root.append(section(t("remTitle"), null, reading(t("remRead")),
+      h("p", { class: "muted", text: t("remNone") })));
+    return { node: root };
+  }
+
+  const drawLetter = o => {
+    const inv = D.invoices.find(i2 => i2.ref === o.invoice);
+    letterBox.innerHTML = "";
+    letterBox.append(
+      h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("remLetter") }),
+      h("div", { class: "letter" },
+        h("p", { class: "fac-small", html:
+          `${D.meta.name}<br>${D.meta.address}, ${D.meta.postal}<br><br>` +
+          `<b>${o.customer}</b><br>${inv ? inv.city : ""}<br><br>` +
+          `${D.meta.postal.split(" ")[1]}, ${date(D.meta.closed_to, true)}` }),
+        h("pre", { class: "letter-body", text: t("remBody", {
+          ref: o.invoice, date: date(o.date, true), amount: money(o.amount),
+          due: date(o.due, true), days: o.late,
+          penalty: money(o.penalty), fee: money(o.fee),
+        }) })),
+      h("p", { class: "readonly" }, badge(t("readOnly")), t("remNotSent")));
+  };
+
+  const list = table([
+    { label: t("cInvoice"), c: true, render: o => o.invoice },
+    { label: t("cCustomer"), render: o => o.customer },
+    { label: t("cDue"), render: o => date(o.due) },
+    { label: t("recLate"), n: true, cls: () => "neg", render: o => o.late + " " + t("recDays") },
+    { label: t("cAmount"), n: true, render: o => num(o.amount) },
+    { label: t("remPenalty"), n: true, render: o => num(o.penalty) },
+    { label: t("remFee"), n: true, render: o => num(o.fee) },
+    { label: t("remClaim"), n: true, cls: () => "neg",
+      render: o => num(o.amount + o.penalty + o.fee) },
+  ], late, {
+    onRow: drawLetter,
+    foot: h("tr", {}, h("td", { colspan: 4, text: t("cTotals") }),
+      h("td", { class: "n", text: num(late.reduce((a, b) => a + b.amount, 0)) }),
+      h("td", { class: "n", text: num(late.reduce((a, b) => a + b.penalty, 0)) }),
+      h("td", { class: "n", text: num(late.reduce((a, b) => a + b.fee, 0)) }),
+      h("td", { class: "n neg", text: num(late.reduce((a, b) => a + b.amount + b.penalty + b.fee, 0)) })),
+  });
+
+  root.append(section(t("remTitle"), null, reading(t("remRead")), list,
+    h("div", { style: { marginTop: "30px" } }, letterBox)));
+  drawLetter(late[0]);
+  return { node: root };
 }
 
 // ============================================================== exports
@@ -628,6 +793,7 @@ function exportsPage(D) {
 const RECIPES = [
   {
     match: ["vendu", "sold", "kg au", "kg to"],
+    credit: true,
     fr: "vendu 12 kg au Café des Artisans", en: "sold 12 kg to Cafe des Artisans",
     event: ["Vente à crédit, centre GRO", "Credit sale, centre GRO"],
     rule: ["Vente de produits finis, TVA 5,5 %, puis sortie de stock au coût standard",
@@ -691,10 +857,50 @@ const RECIPES = [
   },
 ];
 
-function record(D) {
+function record(D, go) {
   const root = h("div", {});
   const result = h("div", { class: "result", hidden: true });
   const input = h("input", { type: "text", placeholder: t("rPlaceholder") });
+  const when = h("input", { type: "date", value: "2026-09-14", min: "2026-01-01", max: "2026-09-30" });
+  const termsSel = h("select", {}, D.terms.map(x =>
+    h("option", { value: x.code, selected: x.code === "30fdm", text: pick(x.fr, x.en) })));
+  const dueLine = h("p", { class: "muted", style: { margin: "10px 0 0", fontSize: "12px" } });
+
+  // "30 jours fin de mois" : on ajoute les jours, puis on repousse au dernier jour du mois.
+  const dueDate = (iso, code) => {
+    const spec = D.terms.find(x => x.code === code);
+    const d = new Date(iso + "T00:00:00");
+    d.setDate(d.getDate() + spec.days);
+    if (spec.eom) d.setDate(new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate());
+    // on reformate a la main : toISOString repasse en UTC et rend la veille a Paris
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const refreshDue = () => {
+    const spec = D.terms.find(x => x.code === termsSel.value);
+    dueLine.innerHTML = t("rDueExplain", {
+      terms: "<b>" + pick(spec.fr, spec.en).toLowerCase() + "</b>",
+      date: date(when.value, true),
+      due: "<b>" + date(dueDate(when.value, termsSel.value), true) + "</b>",
+    });
+  };
+  when.addEventListener("change", refreshDue);
+  termsSel.addEventListener("change", refreshDue);
+
+  // une date ecrite dans la phrase gagne sur le champ: 14/09, 14-09, le 14 septembre
+  const MONTHS = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout",
+    "septembre", "october|octobre", "novembre", "decembre"];
+  const readDate = text => {
+    const clean = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    let m = clean.match(/(\d{1,2})[\/\-.](\d{1,2})/);
+    if (m) return `2026-${String(+m[2]).padStart(2, "0")}-${String(+m[1]).padStart(2, "0")}`;
+    m = clean.match(/(\d{1,2})\s+([a-z]+)/);
+    if (m) {
+      const idx = MONTHS.findIndex(x => x.split("|").some(w => m[2].startsWith(w.slice(0, 4))));
+      if (idx >= 0) return `2026-${String(idx + 1).padStart(2, "0")}-${String(+m[1]).padStart(2, "0")}`;
+    }
+    return null;
+  };
 
   const show = recipe => {
     result.hidden = false;
@@ -703,12 +909,16 @@ function record(D) {
       result.append(h("p", { class: "muted", text: t("rUnknown") }));
       return;
     }
-    const td = recipe.lines.reduce((s, l) => s + l[2], 0);
-    const tc = recipe.lines.reduce((s, l) => s + l[3], 0);
+    const td = recipe.lines.reduce((s2, l) => s2 + l[2], 0);
+    const tc = recipe.lines.reduce((s2, l) => s2 + l[3], 0);
+    const credit = recipe.credit === true;
     result.append(
       h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("rUnderstood") }),
       h("div", { class: "chips", style: { marginTop: 0 } },
+        h("span", { class: "chip" }, t("cDate"), " ", h("b", { text: date(when.value, true) })),
         h("span", { class: "chip" }, t("rEvent"), " ", h("b", { text: pick(recipe.event[0], recipe.event[1]) })),
+        credit ? h("span", { class: "chip" }, t("cDue"), " ",
+          h("b", { text: date(dueDate(when.value, termsSel.value), true) })) : null,
         h("span", { class: "chip" }, t("rRule"), " ", h("b", { text: pick(recipe.rule[0], recipe.rule[1]) }))),
       h("p", { class: "caps", style: { margin: "22px 0 10px" }, text: t("rProposed") }),
       table([
@@ -720,19 +930,23 @@ function record(D) {
         foot: h("tr", {}, h("td", {}), h("td", { text: t("cTotals") }),
           h("td", { class: "n", text: num(td) }), h("td", { class: "n", text: num(tc) })),
       }),
-      h("p", { class: "readonly" },
-        badge(t("readOnly")), t("rNotSaved")));
+      h("p", { class: "readonly" }, badge(t("readOnly")), t("rNotSaved")));
   };
 
   const run = () => {
     const q = input.value.toLowerCase();
-    show(RECIPES.find(r => r.match.some(m => q.includes(m))) || null);
+    const found = readDate(input.value);
+    if (found && found >= "2026-01-01" && found <= "2026-09-30") {
+      when.value = found;
+      refreshDue();
+    }
+    show(RECIPES.find(r => r.match.some(mm => q.includes(mm))) || null);
   };
 
   const examples = h("div", { class: "examples" }, RECIPES.map(r =>
     h("button", {
       type: "button", text: pick(r.fr, r.en),
-      onclick: () => { input.value = pick(r.fr, r.en); show(r); },
+      onclick: () => { input.value = pick(r.fr, r.en); run(); },
     })));
 
   root.append(section(t("rTitle"), null,
@@ -740,11 +954,17 @@ function record(D) {
     h("div", { class: "sandbox" },
       h("div", { class: "prompt" }, input,
         h("button", { class: "btn primary", text: t("rTry"), onclick: run })),
-      h("p", { class: "muted", style: { margin: "14px 0 0", fontSize: "12px" }, text: t("rExamples") }),
+      h("div", { class: "filters", style: { margin: "16px 0 0" } },
+        h("span", { class: "caps", text: t("rWhen") }), when,
+        h("span", { class: "caps", style: { marginLeft: "10px" }, text: t("rTermsField") }), termsSel),
+      dueLine,
+      h("p", { class: "muted", style: { margin: "16px 0 0", fontSize: "12px" }, text: t("rExamples") }),
       examples, result),
-    h("p", { class: "reading", style: { marginTop: "22px" }, text: t("rDemoNote") })));
+    h("p", { class: "reading", style: { marginTop: "22px" }, text: t("rDemoNote") }),
+    h("p", { class: "reading", style: { marginTop: "12px" }, text: t("rWhenNote") })));
 
   input.addEventListener("keydown", e => { if (e.key === "Enter") run(); });
+  refreshDue();
   return { node: root };
 }
 
@@ -862,6 +1082,7 @@ function tutorial(D, go) {
         avg: money(p.avg_green_price), stdp: money(p.std_green),
         price: money(p.variance_price), total: money(p.variance),
         loss: money(Math.abs(i.net)),
+        share: num(p.variance / Math.abs(i.net) * 100, 0),
       }),
     ], d6, ["production", "pProduction"]),
     step(t("tu7t"), [t("tu7a"), t("tu7b")], d7, ["income", "pIncome"]),
@@ -892,5 +1113,7 @@ export const PAGES = {
   "production": { title: "pProduction", crumb: "navManagement", render: production },
   "inventory": { title: "pInventory", crumb: "navManagement", render: inventory },
   "receivables": { title: "pReceivables", crumb: "navManagement", render: receivables },
+  "invoices": { title: "pInvoices", crumb: "navManagement", render: invoices },
+  "reminders": { title: "pReminders", crumb: "navManagement", render: reminders },
   "exports": { title: "pExports", crumb: "navStatements", render: exportsPage },
 };

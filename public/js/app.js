@@ -23,7 +23,13 @@ const NAV = [
     ["trial", "pTrial"]]],
   ["navManagement", [["centres", "pCentres", d => String(d.centres.length)],
     ["production", "pProduction", d => num(d.production.batch_count, 0)],
-    ["inventory", "pInventory"], ["receivables", "pReceivables"]]],
+    ["inventory", "pInventory"],
+    ["invoices", "pInvoices", d => num(d.invoices.length, 0)],
+    ["receivables", "pReceivables"],
+    ["reminders", "pReminders", d => {
+      const n = d.receivables.open.filter(o => o.late > 0).length;
+      return n ? String(n) : "";
+    }]]],
   ["navStatements", [["income", "pIncome"], ["balance", "pBalance"], ["exports", "pExports"]]],
   ["navLearn", [["tutorial", "pTutorial"]]],
 ];

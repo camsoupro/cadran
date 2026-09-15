@@ -250,3 +250,42 @@ tr.head-row td{padding-top:20px; font-family:var(--serif); font-size:15px}
   .reveal{opacity:1; transform:none; transition:none}
   .track .fill, .brow .t i{transition:none}
 }
+
+/* ---------- facture ---------- */
+.invoice{border:1px solid var(--line); background:var(--raised); padding:26px 28px; box-shadow:var(--shadow)}
+.fac-head{display:flex; justify-content:space-between; gap:30px; flex-wrap:wrap;
+  padding-bottom:18px; border-bottom:1px solid var(--ink)}
+.fac-head p{margin:0}
+.fac-strong{font-family:var(--serif); font-size:19px; margin:6px 0 5px !important}
+.fac-small{font-size:11.5px; color:var(--ink-3); line-height:1.75}
+.fac-meta{text-align:right}
+.fac-ref{font-family:var(--mono); font-size:17px; margin:6px 0 5px !important}
+.fac-to{padding:16px 0 18px; border-bottom:1px solid var(--line-2)}
+.fac-to p{margin:0}
+.fac-totals{margin:16px 0 0 auto; width:min(340px,100%)}
+.fac-row{display:flex; justify-content:space-between; gap:20px; padding:7px 0; font-size:13px;
+  border-bottom:1px solid var(--line-2)}
+.fac-row .n{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.fac-row .n.tot{font-weight:500}
+.fac-row:last-child{border-bottom:0; border-top:1px solid var(--ink); margin-top:2px; padding-top:9px}
+.fac-legal{margin-top:24px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--ink-2); line-height:1.75; max-width:82ch}
+.fac-legal p{margin:0 0 8px}
+
+/* ---------- lettre de relance ---------- */
+.letter{border:1px solid var(--line); background:var(--raised); padding:26px 28px; max-width:76ch;
+  box-shadow:var(--shadow)}
+.letter-body{font-family:inherit; font-size:13px; line-height:1.9; white-space:pre-wrap;
+  margin:20px 0 0; color:var(--ink)}
+
+/* ---------- impression : on ne sort que le document ---------- */
+@media print{
+  .rail, .topline, .dateline, .foot, .no-print, .sec-head, .reading, .list-table,
+  .scene, .scene-note, .legend{display:none !important}
+  body{background:#fff; color:#000}
+  .app{display:block}
+  .sheet{padding:0; max-width:none}
+  section{padding:0; border:0}
+  .invoice, .letter{border:0; box-shadow:none; padding:0}
+  a[href]:after{content:""}
+}

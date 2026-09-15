@@ -30,6 +30,11 @@ COMPANY = {
     "name": "Brulerie du Cadran",
     "legal": "SAS au capital de 60 000 EUR",
     "siren": "000 000 000",
+    "vat": "FR 00 000 000 000",
+    "rcs": "RCS Lyon 000 000 000",
+    "ape": "1083Z",
+    "address": "14 rue des Remparts",
+    "postal": "69007 Lyon",
     "city": "Lyon 7e",
     "activity_fr": "Torrefaction de cafe, vente en boutique, en ligne et aux professionnels",
     "activity_en": "Coffee roasting, sold in the shop, online and to trade customers",
@@ -231,11 +236,47 @@ open_items: list[dict] = []
 lot_no = 0
 batch_no = 0
 
+# Delais de paiement, tels qu'ils s'ecrivent sur une facture francaise.
+# "30 jours fin de mois" n'est pas "30 jours" : on ajoute 30 jours, puis on repousse
+# au dernier jour du mois atteint. Le code de commerce plafonne a 60 jours date de
+# facture, ou 45 jours fin de mois (article L441-10).
+TERMS = {
+    "comptant": ("Comptant", "On receipt", 0, False),
+    "30n": ("30 jours nets", "30 days net", 30, False),
+    "30fdm": ("30 jours fin de mois", "30 days end of month", 30, True),
+    "45fdm": ("45 jours fin de mois", "45 days end of month", 45, True),
+}
+
+
+def last_day_of(d: date) -> date:
+    return date(d.year + (d.month == 12), (d.month % 12) + 1, 1) - timedelta(days=1)
+
+
+def due_date(invoice_day: date, terms: str) -> date:
+    _, _, days, end_of_month = TERMS[terms]
+    d = invoice_day + timedelta(days=days)
+    return last_day_of(d) if end_of_month else d
+
+
+# nom, ville, SIREN fictif, delai, plafond de credit
 TRADE_CUSTOMERS = [
-    ("Cafe des Artisans", 30), ("Hotel Bellecour", 45), ("Restaurant La Passerelle", 30),
-    ("Epicerie Bonne Graine", 30), ("Bureau Partage Confluence", 45),
-    ("Boulangerie Saint-Jean", 30), ("Cantine Numerique", 45),
+    ("Cafe des Artisans", "Lyon 1er", "000 111 222", "30fdm"),
+    ("Hotel Bellecour", "Lyon 2e", "000 222 333", "45fdm"),
+    ("Restaurant La Passerelle", "Lyon 6e", "000 333 444", "30n"),
+    ("Epicerie Bonne Graine", "Villeurbanne", "000 444 555", "30fdm"),
+    ("Bureau Partage Confluence", "Lyon 2e", "000 555 666", "45fdm"),
+    ("Boulangerie Saint-Jean", "Lyon 5e", "000 666 777", "30n"),
+    ("Cantine Numerique", "Villeurbanne", "000 777 888", "45fdm"),
 ]
+
+# Penalites de retard : taux directeur BCE majore de dix points, plus l'indemnite
+# forfaitaire de recouvrement de 40 EUR (articles L441-10 et D441-5 du code de commerce).
+BCE_RATE = 0.0215
+LATE_RATE = BCE_RATE + 0.10
+RECOVERY_FEE = 40.0
+
+invoices: list[dict] = []
+invoice_no = 0
 
 # --------------------------------------------------------------------------- monthly
 
@@ -397,20 +438,33 @@ def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
                 ("445710", 0, ship_vat, None, "TVA collectee 20 %")])
         state["vat_out"] += vat + ship_vat
     else:
-        name, terms = random.choice(TRADE_CUSTOMERS)
+        global invoice_no
+        name, city, siren, terms = random.choice(TRADE_CUSTOMERS)
         total = r2(ht + vat)
-        due = day + timedelta(days=terms)
-        e = B.post(day, "VE", f"Facture {name}, {kg:.0f} kg",
-                   f"Invoice {name}, {kg:.0f} kg",
-                   [("411000", total, 0, None, f"Client {name}"),
+        due = due_date(day, terms)
+        invoice_no += 1
+        ref = f"FA-2026-{invoice_no:04d}"
+        e = B.post(day, "VE", f"Facture {ref}, {name}, {kg:.0f} kg",
+                   f"Invoice {ref}, {name}, {kg:.0f} kg",
+                   [("411000", total, 0, None, f"Client {name}, facture {ref}"),
                     ("701000", 0, ht, "GRO", f"{kg:.0f} kg de cafe torrefie"),
-                    ("445710", 0, vat, None, "TVA collectee 5,5 %")])
+                    ("445710", 0, vat, None, "TVA collectee 5,5 %")],
+                   piece=ref)
         state["customer"] += total
         state["vat_out"] += vat
         slow = name in ("Cantine Numerique", "Bureau Partage Confluence")
-        open_items.append({"customer": name, "entry": e["number"], "date": day.isoformat(),
-                           "due": due.isoformat(), "amount": total, "terms": terms,
-                           "slow": slow, "settled": False})
+        # choisi sans toucher au generateur aleatoire : un tirage de plus ici decalerait
+        # toute la simulation en aval (achats, brassins, tresorerie)
+        blend, blend_en, _ = ORIGINS[invoice_no % len(ORIGINS)]
+        invoices.append({
+            "ref": ref, "entry": e["number"], "date": day.isoformat(), "due": due.isoformat(),
+            "customer": name, "city": city, "siren": siren, "terms": terms,
+            "kg": kg, "unit_price": PRICES["GRO"], "ht": ht, "vat": vat, "vat_rate": VAT_FOOD,
+            "total": total, "blend_fr": blend, "blend_en": blend_en,
+        })
+        open_items.append({"customer": name, "entry": e["number"], "invoice": ref,
+                           "date": day.isoformat(), "due": due.isoformat(), "amount": total,
+                           "terms": terms, "slow": slow, "settled": False})
 
     B.post(day, "ST", f"Sortie de stock au cout standard, {lines_fr.lower()}",
            f"Inventory issued at standard cost, {lines_en.lower()}",
@@ -428,10 +482,13 @@ def settle_customers(day: date) -> None:
         if item.get("slow"):
             due = due + timedelta(days=random.choice([28, 35, 46, 62]))
         if (due - timedelta(days=4)) <= day and random.random() < 0.9:
-            B.post(day, "BQ", f"Reglement {item['customer']}, facture {item['entry']}",
-                   f"Payment {item['customer']}, invoice {item['entry']}",
+            B.post(day, "BQ", f"Reglement facture {item['invoice']}, {item['customer']}",
+                   f"Payment of invoice {item['invoice']}, {item['customer']}",
                    [("512000", item["amount"], 0, None, "Virement recu"),
-                    ("411000", 0, item["amount"], None, f"Client {item['customer']}")])
+                    ("411000", 0, item["amount"], None,
+                     f"Client {item['customer']}, facture {item['invoice']}")],
+                   piece=item["invoice"])
+            item["paid_on"] = day.isoformat()
             item["settled"] = True
             state["customer"] = r2(state["customer"] - item["amount"])
 
@@ -599,6 +656,11 @@ def monthly_costs(day: date, m: int) -> None:
 
 # --------------------------------------------------------------------------- the year
 
+# Jours feries 2026 : on ne torrefie pas et on ne facture pas ce jour la.
+# Paques tombe le 5 avril 2026, d'ou le lundi 6, l'Ascension le 14 mai et la Pentecote le 25.
+HOLIDAYS = {date(2026, 1, 1), date(2026, 4, 6), date(2026, 5, 1), date(2026, 5, 8),
+            date(2026, 5, 14), date(2026, 5, 25), date(2026, 7, 14), date(2026, 8, 15)}
+
 SEASON = {1: .88, 2: .90, 3: .97, 4: 1.0, 5: 1.02, 6: .96, 7: .78, 8: .70, 9: 1.08}
 
 for m in range(1, 10):
@@ -606,10 +668,11 @@ for m in range(1, 10):
     factor = SEASON[m]
     for d in days:
         wd = d.weekday()
-        if wd == 6:
+        if wd == 6 or d in HOLIDAYS:
             continue
-        # green coffee arrives about twice a week, roughly 850 kg
-        if wd in (0, 2, 3) and random.random() < 0.42:
+        # on achete quand le stock descend sous trois semaines de consommation,
+        # pas au hasard : sinon un jour ferie ou une semaine creuse fait gonfler le stock
+        if wd in (0, 2, 3) and state["green_kg"] < 3_500:
             buy_green(d)
         if d.day in (8, 22):
             buy_packaging(d)
@@ -767,8 +830,17 @@ def build() -> dict:
         key = ("current" if late <= 0 else "d30" if late <= 30 else "d60" if late <= 60
                else "d90" if late <= 90 else "over")
         ageing[key] = r2(ageing[key] + it["amount"])
-        open_now.append({**it, "late": late})
-    open_now.sort(key=lambda x: -x["amount"])
+        # penalites de retard : montant x taux x jours / 365, plus l'indemnite forfaitaire
+        penalty = r2(it["amount"] * LATE_RATE * late / 365) if late > 0 else 0.0
+        open_now.append({**it, "late": late, "penalty": penalty,
+                         "fee": RECOVERY_FEE if late > 0 else 0.0,
+                         "terms_fr": TERMS[it["terms"]][0], "terms_en": TERMS[it["terms"]][1]})
+    open_now.sort(key=lambda x: (-x["late"], -x["amount"]))
+
+    # delai moyen de reglement reellement constate, sur les factures payees
+    paid = [i for i in open_items if i.get("paid_on")]
+    dso = (round(sum((date.fromisoformat(i["paid_on"]) - date.fromisoformat(i["date"])).days
+                     for i in paid) / len(paid), 1) if paid else 0.0)
 
     return {
         "meta": {**COMPANY, "generated": date.today().isoformat(),
@@ -824,8 +896,16 @@ def build() -> dict:
             "lots": [l for l in lots if l["kg_left"] > 0.05][-30:],
             "green_kg": state["green_kg"], "fg_kg": state["fg_kg"],
         },
-        "receivables": {"ageing": ageing, "open": open_now[:14],
-                        "total": r2(sum(ageing.values()))},
+        "receivables": {
+            "ageing": ageing, "open": open_now[:20], "total": r2(sum(ageing.values())),
+            "late_total": r2(sum(o["amount"] for o in open_now if o["late"] > 0)),
+            "penalties": r2(sum(o["penalty"] + o["fee"] for o in open_now)),
+            "dso": dso, "paid_count": len(paid),
+            "late_rate": round(LATE_RATE, 4), "bce_rate": BCE_RATE, "fee": RECOVERY_FEE,
+        },
+        "invoices": invoices,
+        "terms": [{"code": k, "fr": v[0], "en": v[1], "days": v[2], "eom": v[3]}
+                  for k, v in TERMS.items()],
     }
 
 
@@ -871,4 +951,8 @@ print(f"receivables       {b['receivables']:>12,.2f}")
 print(f"inventory         {b['inventory']:>12,.2f}")
 print(f"roasted kg        {p['roasted_kg']:>12,.1f}  yield {p['yield']*100:.1f} % vs {p['std_yield']*100:.0f} %")
 print(f"variance          {p['variance']:>12,.2f}  lost kg {p['lost_kg']:,.0f}")
+r = books["receivables"]
+print(f"invoices          {len(invoices):>12,}")
+print(f"open / late       {len(r['open']):>12}  late {r['late_total']:,.2f}")
+print(f"DSO reel          {r['dso']:>12} jours sur {r['paid_count']} factures payees")
 print(f"json bytes        {(out / 'books.json').stat().st_size:>12,}")
