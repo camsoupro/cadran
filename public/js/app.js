@@ -100,7 +100,11 @@ function dateline() {
 
 function footer() {
   return h("p", { class: "foot" },
-    t("fDemo"), " · ", t("fBuilt"), " Camilla Bouyahia");
+    t("fDemo"), " · ", t("fBuilt"), " ",
+    h("a", {
+      href: "https://www.linkedin.com/in/camilla-bouyahia-8b9b3b435",
+      target: "_blank", rel: "noopener noreferrer",
+    }, "Camilla Bouyahia"));
 }
 
 async function render() {
