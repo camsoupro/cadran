@@ -927,7 +927,9 @@ function record(D, go) {
   const when = h("input", { type: "date", value: "2026-09-14", min: "2026-01-01", max: "2026-09-30" });
   const termsSel = h("select", {}, (D.terms || []).map(x =>
     h("option", { value: x.code, selected: x.code === "30fdm", text: pick(x.fr, x.en) })));
-  const dueLine = h("p", { class: "muted", style: { margin: "10px 0 0", fontSize: "12px" } });
+  const dueLine = h("p", { class: "due-line" });
+  const termsLabel = h("span", { class: "caps", text: t("rTermsNeutral") });
+  const termsWrap = h("div", { class: "ctl" }, termsLabel, termsSel, dueLine);
 
   // "30 jours fin de mois" : on ajoute les jours, puis on repousse au dernier jour du mois.
   const dueDate = (iso, code) => {
@@ -984,16 +986,6 @@ function record(D, go) {
     const credit = recipe.credit === "customer" || recipe.credit === "supplier";
     const posts = recipe.lines.length > 0;
 
-    // le bloc du delai n'existe que pour une operation a credit
-    const termsBlock = credit
-      ? h("div", { class: "terms-block" },
-          h("div", { class: "filters", style: { margin: 0 } },
-            h("span", { class: "caps",
-              text: t(recipe.credit === "supplier" ? "rTermsSupplier" : "rTermsCustomer") }),
-            termsSel),
-          dueLine)
-      : null;
-
     const parts = [
       h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("rUnderstood") }),
       h("div", { class: "chips", style: { marginTop: 0 } },
@@ -1007,7 +999,6 @@ function record(D, go) {
             ? h("span", { class: "chip" }, h("b", { text: t(SETTLE[recipe.settle]) }))
             : null,
         h("span", { class: "chip" }, t("rRule"), " ", h("b", { text: pick(recipe.rule[0], recipe.rule[1]) }))),
-      termsBlock,
       posts ? h("p", { class: "caps", style: { margin: "22px 0 10px" }, text: t("rProposed") }) : null,
       !posts
         ? h("div", { class: "no-entry" },
@@ -1028,7 +1019,22 @@ function record(D, go) {
       h("p", { class: "readonly" }, badge(t("readOnly")), t("rNotSaved")),
     ];
     result.append(...parts.filter(Boolean));
-    if (credit) refreshDue();
+    setTerms(recipe);
+  };
+
+  // Le delai reste visible tout le temps. Quand il ne s'applique pas, il se desactive
+  // en disant pourquoi : c'est ce qui apprend a quoi sert un delai de paiement.
+  const setTerms = recipe => {
+    const credit = recipe && (recipe.credit === "customer" || recipe.credit === "supplier");
+    termsSel.disabled = !credit && Boolean(recipe);
+    termsWrap.classList.toggle("off", !credit && Boolean(recipe));
+    termsLabel.textContent = t(!recipe ? "rTermsNeutral"
+      : recipe.credit === "supplier" ? "rTermsSupplier"
+      : recipe.credit === "customer" ? "rTermsCustomer"
+      : "rTermsOff");
+    if (credit) return refreshDue();
+    if (!recipe) return dueLine.innerHTML = t("rTermsIdle");
+    dueLine.innerHTML = !recipe.lines.length ? t("rNoDue") : t(SETTLE[recipe.settle] || "rNoDue");
   };
 
   const run = () => {
@@ -1055,16 +1061,18 @@ function record(D, go) {
     h("div", { class: "sandbox" },
       h("div", { class: "prompt" }, input,
         h("button", { class: "btn primary", text: t("rTry"), onclick: run })),
-      h("div", { class: "filters", style: { margin: "16px 0 0" } },
-        h("span", { class: "caps", text: t("rWhen") }), when),
-      h("p", { class: "muted", style: { margin: "8px 0 0", fontSize: "12px" }, text: t("rWhenHint") }),
+      h("div", { class: "controls" },
+        h("div", { class: "ctl" },
+          h("span", { class: "caps", text: t("rWhen") }), when,
+          h("small", { text: t("rWhenHint") })),
+        termsWrap),
       h("p", { class: "muted", style: { margin: "16px 0 0", fontSize: "12px" }, text: t("rExamples") }),
       examples, result),
     h("p", { class: "reading", style: { marginTop: "22px" }, text: t("rDemoNote") }),
     h("p", { class: "reading", style: { marginTop: "12px" }, text: t("rWhenNote") })));
 
   input.addEventListener("keydown", e => { if (e.key === "Enter") run(); });
-  refreshDue();
+  setTerms(null);
   return { node: root };
 }
 

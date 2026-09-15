@@ -314,6 +314,14 @@ export const STR = {
     "Dettes de paie et de cotisations, avec leurs échéances propres",
     "Payroll and contribution liabilities, with their own statutory deadlines"],
   rSettleInternal: ["Mouvement interne, aucun règlement", "Internal movement, nothing is settled"],
+  rTermsNeutral: ["Délai de paiement", "Payment terms"],
+  rTermsOff: ["Sans objet pour cette phrase", "Not applicable to this sentence"],
+  rNoDue: [
+    "Aucune écriture, donc aucun délai et aucune échéance.",
+    "No entry, so no terms and no due date."],
+  rTermsIdle: [
+    "Ce délai s'appliquera si la phrase décrit un achat ou une vente à crédit. Sur un loyer payé par virement, il n'y a rien à échelonner.",
+    "These terms apply if the sentence describes a purchase or a sale on credit. On rent paid by transfer there is nothing to schedule."],
   rComputedDue: ["Échéance calculée", "Computed due date"],
   rDueExplain: [
     "Un délai de {terms} appliqué à une facture du {date} donne le {due}.",
