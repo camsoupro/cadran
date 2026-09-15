@@ -35,6 +35,73 @@ export const STR = {
   pExports: ["Exports", "Exports"],
   pInvoices: ["Factures", "Invoices"],
   pReminders: ["Relances", "Reminders"],
+  pPayables: ["Dettes fournisseurs", "Supplier debts"],
+  pAnalysis: ["En clair", "In plain words"],
+
+  // ---------------------------------------------------------------- raison d'etre
+  whyTitle: ["Pourquoi ce logiciel existe", "Why this software exists"],
+  whyText: [
+    "Une petite entreprise ne rate pas ses comptes par manque de sérieux, elle les rate parce que la comptabilité parle une langue qu'elle n'a pas apprise. Cadran est construit sur l'idée inverse : <b>on dit ce qui s'est passé avec ses mots</b>, le logiciel écrit l'écriture juste, et il explique ensuite ce que les chiffres veulent dire, en français ordinaire. Rien n'est caché derrière un tableau qu'il faudrait savoir lire : chaque total de ce site renvoie aux écritures qui le composent.",
+    "A small business does not lose track of its books through carelessness, it loses track because accounting speaks a language nobody taught them. Cadran is built the other way round: <b>you say what happened in your own words</b>, the software writes the correct entry, and then explains what the figures mean in plain language. Nothing hides behind a table you would need training to read: every total on this site points back to the entries behind it."],
+
+  // ---------------------------------------------------------------- dettes fournisseurs
+  payTitle: ["Ce que nous devons", "What we owe"],
+  payRead: [
+    "L'autre moitié du tableau. Les créances disent ce qu'on nous doit ; cette page dit ce que nous devons, à qui, et pour quand. Un fournisseur accorde lui aussi un délai, et une trésorerie se gère avec les deux colonnes sous les yeux.",
+    "The other half of the picture. Receivables say what is owed to us; this page says what we owe, to whom, and by when. A supplier grants terms too, and cash is managed with both columns in sight."],
+  payTotal: ["Dettes fournisseurs", "Supplier debts"],
+  payNext30: ["À payer sous 30 jours", "Due within 30 days"],
+  payDpo: ["Délai moyen de paiement", "Average days to pay"],
+  payDpoNote: ["sur les {n} factures déjà réglées", "over the {n} invoices already settled"],
+  payBalance: ["L'équilibre des délais", "The balance of terms"],
+  payBalanceNote: [
+    "Nous payons nos fournisseurs en <b>{dpo} jours</b> et nos clients nous paient en <b>{dso} jours</b>. L'écart de {gap} jours est financé par la trésorerie de l'entreprise. C'est la façon la plus discrète de manquer d'argent tout en étant bénéficiaire.",
+    "We pay our suppliers in <b>{dpo} days</b> and our customers pay us in <b>{dso} days</b>. The {gap} day gap is financed out of the company's own cash. It is the quietest way to run out of money while turning a profit."],
+  paySupplier: ["Fournisseur", "Supplier"],
+  payWhat: ["Objet", "For"],
+
+  // ---------------------------------------------------------------- en clair
+  anTitle: ["Vos livres, en clair", "Your books, in plain words"],
+  anLede: [
+    "La même comptabilité, sans un seul mot de comptable. Si une phrase de cette page demande un dictionnaire, c'est qu'elle est mal écrite.",
+    "The same accounting, without a single accounting word. If a sentence on this page needs a dictionary, it is badly written."],
+  anRefresh: ["Recalculer", "Run it again"],
+  anQ1: ["Où part l'argent qui entre ?", "Where does the money go?"],
+  anA1: [
+    "Sur <b>100 €</b> encaissés : <b>{materials} €</b> partent en café vert et en emballages, <b>{people} €</b> en salaires et cotisations, <b>{place} €</b> en loyer et en énergie, <b>{services} €</b> en transport, assurance et autres services, <b>{wear} €</b> pour l'usure du matériel, et <b>{unpaid} €</b> en factures qu'un client ne paiera jamais. Il reste <b>{kept} €</b>.",
+    "Out of every <b>100 €</b> taken in: <b>{materials} €</b> go to green coffee and packaging, <b>{people} €</b> to wages and contributions, <b>{place} €</b> to rent and energy, <b>{services} €</b> to carriage, insurance and other services, <b>{wear} €</b> to wear on the equipment, and <b>{unpaid} €</b> to invoices a customer will never pay. <b>{kept} €</b> are left."],
+  anQ2: ["Est-ce que l'entreprise gagne de l'argent ?", "Is the business making money?"],
+  anA2: [
+    "Oui, mais très peu : <b>{kept} € sur 100</b>. Sur neuf mois, cela fait <b>{profit}</b>. C'est moins que ce qu'un seul gros client lui doit aujourd'hui.",
+    "Yes, but barely: <b>{kept} € in every 100</b>. Over nine months that is <b>{profit}</b>. It is less than what a single large customer owes right now."],
+  anQ3: ["Reste-t-il de l'argent sur le compte ?", "Is there money in the bank?"],
+  anA3: [
+    "Oui : <b>{cash}</b> en banque et en caisse au 30 septembre. Au rythme actuel des dépenses, cela tient <b>{months} mois</b> même si plus rien ne rentrait.",
+    "Yes: <b>{cash}</b> in the bank and the till at 30 September. At the current rate of spending, that lasts <b>{months} months</b> even if nothing came in."],
+  anQ4: ["Qui doit de l'argent à qui ?", "Who owes whom?"],
+  anA4: [
+    "Les clients professionnels nous doivent <b>{owed}</b>. Nous devons <b>{owing}</b> à nos fournisseurs. Nous payons en <b>{dpo} jours</b> et nous sommes payés en <b>{dso} jours</b> : nous faisons crédit plus longtemps que nous n'en recevons, et cette différence sort de notre poche.",
+    "Trade customers owe us <b>{owed}</b>. We owe <b>{owing}</b> to our suppliers. We pay in <b>{dpo} days</b> and are paid in <b>{dso} days</b>: we lend for longer than we borrow, and the difference comes out of our own pocket."],
+  anQ5: ["Qu'est-ce qui ne va pas ?", "What is going wrong?"],
+  anA5: [
+    "Deux choses. <b>Un client ne paie plus du tout</b> depuis le printemps : {amount} sont déjà comptés comme perdus, et si un deuxième faisait pareil l'année deviendrait négative. Et <b>le café perd plus de poids que prévu en cuisant</b> : {lost} kg de café vert partis au-delà de la normale, soit {variance}, davantage que le bénéfice de l'année.",
+    "Two things. <b>One customer has stopped paying</b> since the spring: {amount} are already counted as lost, and if a second did the same the year would turn negative. And <b>the coffee loses more weight than expected while roasting</b>: {lost} kg of green coffee gone beyond normal, that is {variance}, more than the whole year's profit."],
+  anQ6: ["Que faire lundi matin ?", "What to do on Monday morning?"],
+  anA6: [
+    "Appeler le client qui ne paie plus, avant que la créance ait un an. Régler le tambour du torréfacteur et repeser un brassin pour vérifier. Demander à deux ou trois clients de passer à trente jours au lieu de quarante-cinq. Aucune de ces trois actions ne coûte d'argent.",
+    "Call the customer who has stopped paying, before the debt turns a year old. Adjust the roaster and weigh a batch to check. Ask two or three customers to move from forty-five days to thirty. None of those three costs anything."],
+  anWhere: ["Sur 100 € encaissés", "Out of every 100 EUR taken in"],
+  anMaterials: ["Café et emballages", "Coffee and packaging"],
+  anPeople: ["Salaires", "Wages"],
+  anPlace: ["Loyer et énergie", "Rent and energy"],
+  anServices: ["Autres services", "Other services"],
+  anWear: ["Usure du matériel", "Wear on equipment"],
+  anUnpaid: ["Jamais payé", "Never paid"],
+  anBank: ["Banque", "Bank"],
+  anKept: ["Il reste", "Left over"],
+  anFootnote: [
+    "Chaque phrase de cette page est calculée à partir des mêmes écritures que les états financiers. Rien n'est arrondi en douce : les montants exacts sont dans le compte de résultat.",
+    "Every sentence on this page is computed from the same entries as the financial statements. Nothing is quietly rounded: the exact amounts are in the income statement."],
 
   // ---------------------------------------------------------------- factures
   invTitleFac: ["Factures clients", "Customer invoices"],

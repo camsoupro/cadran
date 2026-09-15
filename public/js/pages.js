@@ -168,7 +168,8 @@ async function overview(D, go) {
   latest.querySelector(".sec-head").append(
     h("span", { class: "right" }, h("a", { href: "#/journal", class: "btn", text: t("seeAll") })));
 
-  root.append(hero, figs, finding, fragile, months, centres, lastSec, latest);
+  const why = h("section", { class: "reveal" }, callout(t("whyTitle"), t("whyText")));
+  root.append(hero, figs, why, finding, fragile, months, centres, lastSec, latest);
 
   const disposers = [];
   queueMicrotask(async () => {
@@ -1144,6 +1145,117 @@ function tutorial(D, go) {
   };
 }
 
+
+// ============================================================== supplier debts
+
+function payables(D) {
+  const pa = D.payables || { open: [] };
+  const r = D.receivables;
+  const gap = Math.round((r.dso - pa.dpo) * 10) / 10;
+
+  const figs = h("div", { class: "figs" },
+    figure(t("payTotal"), money(pa.total, { compact: true }), pa.count + " " + t("cInvoice").toLowerCase()),
+    figure(t("payNext30"), money(pa.next30, { compact: true }), t("payNext30")),
+    figure(t("payDpo"), num(pa.dpo, 1) + " " + pick("jours", "days"),
+      t("payDpoNote", { n: num(pa.paid_count, 0) })),
+    figure(t("recDso"), num(r.dso, 1) + " " + pick("jours", "days"),
+      t("recDsoNote", { n: num(r.paid_count, 0) }), gap > 0 ? "neg" : ""));
+
+  return {
+    node: h("div", {},
+      section(t("payTitle"), null, reading(t("payRead")), figs,
+        callout(t("payBalance"), t("payBalanceNote", {
+          dpo: num(pa.dpo, 1), dso: num(r.dso, 1), gap: num(Math.abs(gap), 1),
+        })),
+        h("p", { class: "caps", style: { margin: "32px 0 10px" }, text: t("payTitle") }),
+        table([
+          { label: t("cInvoice"), c: true, render: b => b.ref },
+          { label: t("paySupplier"), render: b => b.supplier },
+          { label: t("payWhat"), hide: true, render: b => pick(b.what_fr, b.what_en) },
+          { label: t("cTerms"), hide: true, render: b => {
+            const x = (D.terms || []).find(y => y.code === b.terms);
+            return x ? pick(x.fr, x.en) : b.terms;
+          } },
+          { label: t("cDue"), render: b => dateAuto(b.due) },
+          { label: t("recLate"), n: true, cls: b => b.late > 0 ? "neg" : "",
+            render: b => b.late > 0 ? b.late + " " + t("recDays") : "-" },
+          { label: t("cTTC"), n: true, render: b => num(b.amount) },
+        ], pa.open, {
+          foot: h("tr", {}, h("td", { colspan: 6, text: t("cTotal") }),
+            h("td", { class: "n", text: num(pa.total) })),
+        }))),
+  };
+}
+
+// ============================================================== plain words
+
+async function analysis(D, go) {
+  const p = D.production, i = D.income_statement, b = D.balance_sheet;
+  const st = D.stress || {}, r = D.receivables, pa = D.payables || {};
+  const per = Object.fromEntries((D.per100 || []).map(x => [x.key, x.pct]));
+  const e = k => num(per[k] || 0, 2);
+
+  // combien de mois la tresorerie tient si plus rien ne rentre
+  const monthlySpend = (i.op_charges - i.depreciation) / 9;
+  const months = num(b.cash / monthlySpend, 1);
+
+  const root = h("div", {});
+  const box = h("div", { class: "scene" });
+  const blocks = [
+    ["materials", "anMaterials"], ["people", "anPeople"], ["place", "anPlace"],
+    ["services", "anServices"], ["wear", "anWear"], ["unpaid", "anUnpaid"],
+    ["bank", "anBank"], ["kept", "anKept"],
+  ].filter(([k]) => (per[k] || 0) > 0.05);
+  // gris pour ce qui sort normalement, rouge pour ce qui ne rentrera jamais,
+  // vert pour ce qui reste : trois couleurs, trois idees
+  const colourOf = c => c.key === "kept" ? "--pos" : c.key === "unpaid" ? "--neg" : "--ink-3";
+
+  let dispose = null;
+  const mount = async () => {
+    if (dispose) { dispose(); dispose = null; }
+    dispose = await mountCentres(box, blocks.map(([k, label]) => ({
+      key: k, code: t(label), name: t(label), kind: t("anWhere"), result: per[k],
+    })), {
+      money: v => num(v, 2) + " €",
+      line: c => `${num(c.result, 2)} € ${pick("sur 100 encaisses", "out of every 100 taken in")}`,
+    }, {
+      spacing: 1.3, width: .84, camZ: 13.2, camY: 2.4, lookY: .4,
+      tall: 2.6, stagger: true, colour: colourOf,
+    });
+  };
+
+  const qa = (q, a) => h("div", { class: "step" },
+    h("div", { class: "no" }), h("div", {}, h("h3", { text: t(q) }), h("p", { html: a })));
+
+  root.append(
+    section(t("anTitle"), null,
+      h("p", { class: "lede", style: { marginTop: 0 }, text: t("anLede") }),
+      h("p", { style: { margin: "18px 0 0" } },
+        h("button", { class: "btn primary", text: t("anRefresh"), onclick: () => mount() })),
+      h("p", { class: "caps", style: { margin: "30px 0 4px" }, text: t("anWhere") }),
+      box,
+      h("div", { class: "steps", style: { marginTop: "26px" } },
+        qa("anQ1", t("anA1", {
+          materials: e("materials"), people: e("people"), place: e("place"),
+          services: e("services"), wear: e("wear"), unpaid: e("unpaid"), kept: e("kept"),
+        })),
+        qa("anQ2", t("anA2", { kept: e("kept"), profit: money(i.net) })),
+        qa("anQ3", t("anA3", { cash: money(b.cash), months })),
+        qa("anQ4", t("anA4", {
+          owed: money(r.total), owing: money(pa.total || 0),
+          dpo: num(pa.dpo || 0, 1), dso: num(r.dso, 1),
+        })),
+        qa("anQ5", t("anA5", {
+          amount: money(st.allowance_booked || 0), lost: num(p.excess_green, 0),
+          variance: money(p.variance),
+        })),
+        qa("anQ6", t("anA6"))),
+      h("p", { class: "reading", style: { marginTop: "26px" }, text: t("anFootnote") })));
+
+  queueMicrotask(mount);
+  return { node: root, cleanup: () => { if (dispose) dispose(); } };
+}
+
 // ============================================================== registry
 
 export const PAGES = {
@@ -1161,5 +1273,7 @@ export const PAGES = {
   "receivables": { title: "pReceivables", crumb: "navManagement", render: receivables },
   "invoices": { title: "pInvoices", crumb: "navManagement", render: invoices },
   "reminders": { title: "pReminders", crumb: "navManagement", render: reminders },
+  "payables": { title: "pPayables", crumb: "navManagement", render: payables },
+  "analysis": { title: "pAnalysis", crumb: "navLearn", render: analysis },
   "exports": { title: "pExports", crumb: "navStatements", render: exportsPage },
 };

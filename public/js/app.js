@@ -26,12 +26,13 @@ const NAV = [
     ["inventory", "pInventory"],
     ["invoices", "pInvoices", d => num((d.invoices || []).length, 0)],
     ["receivables", "pReceivables"],
+    ["payables", "pPayables", d => num((d.payables || { count: 0 }).count, 0)],
     ["reminders", "pReminders", d => {
       const n = (d.receivables.open || []).filter(o => o.late > 0).length;
       return n ? String(n) : "";
     }]]],
   ["navStatements", [["income", "pIncome"], ["balance", "pBalance"], ["exports", "pExports"]]],
-  ["navLearn", [["tutorial", "pTutorial"]]],
+  ["navLearn", [["analysis", "pAnalysis"], ["tutorial", "pTutorial"]]],
 ];
 
 const LOGO = `<svg viewBox="0 0 48 48" width="{w}" height="{w}" aria-hidden="true" style="display:block">

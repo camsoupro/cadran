@@ -237,6 +237,7 @@ PRICES = {           # EUR per kg, excluding VAT
 
 state = {
     "till": 1_450.0,
+    "supplier_opening": 39_870.0,
     "green_kg": 10_300.0, "green_val": 61_450.0,
     "pack_val": 8_260.0,
     "fg_kg": 2_780.0, "fg_val": 24_180.0,
@@ -297,6 +298,15 @@ RECOVERY_FEE = 40.0
 
 invoices: list[dict] = []
 invoice_no = 0
+bills: list[dict] = []
+bill_no = 0
+
+# Les fournisseurs accordent eux aussi des delais : c'est la moitie qu'on oublie
+# toujours de regarder quand on suit une tresorerie.
+SUPPLIERS = {
+    "Belco, cafe vert": "30fdm",
+    "Packstore, emballages": "30n",
+}
 
 # --------------------------------------------------------------------------- monthly
 
@@ -319,11 +329,19 @@ def buy_green(day: date) -> None:
     ht = r2(kg * price)
     vat = r2(ht * VAT_FOOD)
     ref = f"LOT-{lot_no:03d}"
-    B.post(day, "AC", f"Cafe vert {fr}, {kg} kg a {price:.2f} EUR, lot {ref}",
-           f"Green coffee {en}, {kg} kg at {price:.2f} EUR, lot {ref}",
-           [("601000", ht, 0, "TOR", f"Cafe vert {fr}, lot {ref}"),
-            ("445660", vat, 0, None, "TVA deductible 5,5 %"),
-            ("401000", 0, r2(ht + vat), None, "Fournisseur Belco")], piece=ref)
+    global bill_no
+    bill_no += 1
+    bill = f"FR-2026-{bill_no:04d}"
+    terms = SUPPLIERS["Belco, cafe vert"]
+    e_ac = B.post(day, "AC", f"Cafe vert {fr}, {kg} kg a {price:.2f} EUR, lot {ref}",
+                  f"Green coffee {en}, {kg} kg at {price:.2f} EUR, lot {ref}",
+                  [("601000", ht, 0, "TOR", f"Cafe vert {fr}, lot {ref}"),
+                   ("445660", vat, 0, None, "TVA deductible 5,5 %"),
+                   ("401000", 0, r2(ht + vat), None, "Fournisseur Belco")], piece=ref)
+    bills.append({"ref": bill, "entry": e_ac["number"], "supplier": "Belco, cafe vert",
+                     "what_fr": f"Cafe vert {fr}, {kg} kg", "what_en": f"Green coffee {en}, {kg} kg",
+                     "date": day.isoformat(), "due": due_date(day, terms).isoformat(),
+                     "terms": terms, "ht": ht, "vat": vat, "amount": r2(ht + vat), "settled": False})
     B.post(day, "ST", f"Entree en stock du lot {ref}, {kg} kg",
            f"Lot {ref} into inventory, {kg} kg",
            [("310000", ht, 0, None, f"Stock de cafe vert, lot {ref}"),
@@ -339,10 +357,18 @@ def buy_green(day: date) -> None:
 def buy_packaging(day: date) -> None:
     ht = r2(random.uniform(1450, 2300))
     vat = r2(ht * VAT_STANDARD)
-    B.post(day, "AC", "Sachets, valves et etiquettes", "Bags, valves and labels",
-           [("602100", ht, 0, "TOR", "Emballages et fournitures"),
-            ("445660", vat, 0, None, "TVA deductible 20 %"),
-            ("401000", 0, r2(ht + vat), None, "Fournisseur Packstore")])
+    global bill_no
+    bill_no += 1
+    bill = f"FR-2026-{bill_no:04d}"
+    terms = SUPPLIERS["Packstore, emballages"]
+    e_ac = B.post(day, "AC", "Sachets, valves et etiquettes", "Bags, valves and labels",
+                  [("602100", ht, 0, "TOR", "Emballages et fournitures"),
+                   ("445660", vat, 0, None, "TVA deductible 20 %"),
+                   ("401000", 0, r2(ht + vat), None, "Fournisseur Packstore")], piece=bill)
+    bills.append({"ref": bill, "entry": e_ac["number"], "supplier": "Packstore, emballages",
+                     "what_fr": "Sachets, valves et etiquettes", "what_en": "Bags, valves and labels",
+                     "date": day.isoformat(), "due": due_date(day, terms).isoformat(),
+                     "terms": terms, "ht": ht, "vat": vat, "amount": r2(ht + vat), "settled": False})
     B.post(day, "ST", "Entree en stock des emballages", "Packaging into inventory",
            [("320000", ht, 0, None, "Stock d'emballages"),
             ("603200", 0, ht, "TOR", "Variation des stocks d'emballages")])
@@ -552,13 +578,32 @@ def settle_opening(day: date, amount: float) -> None:
 
 
 def pay_suppliers(day: date) -> None:
-    amount = r2(state["supplier"] * random.uniform(0.55, 0.75))
-    if amount < 500:
+    """On paie ce qui est echu, pas un pourcentage au hasard.
+
+    Le tirage aleatoire est conserve pour decider si l'on regle quelques jours avant
+    l'echeance ou quelques jours apres : une entreprise n'est jamais exactement a l'heure.
+    """
+    slack = random.uniform(0.55, 0.75)
+    early = timedelta(days=3 if slack > 0.65 else -2)
+    due_now = [b for b in bills
+               if not b["settled"] and date.fromisoformat(b["due"]) <= day + early]
+    amount = r2(sum(b["amount"] for b in due_now))
+    # le solde d'ouverture des fournisseurs se regle sur les premieres semaines
+    opening = 0.0
+    if day < date(2026, 3, 1) and state["supplier_opening"] > 0:
+        opening = r2(min(state["supplier_opening"], 6_645.0))
+        state["supplier_opening"] = r2(state["supplier_opening"] - opening)
+    total = r2(amount + opening)
+    if total < 200:
         return
-    B.post(day, "BQ", "Reglement des fournisseurs", "Supplier payment run",
-           [("401000", amount, 0, None, "Fournisseurs"),
-            ("512000", 0, amount, None, "Virements emis")])
-    state["supplier"] = r2(state["supplier"] - amount)
+    label = f"Reglement de {len(due_now)} factures fournisseurs" if due_now else "Reglement fournisseurs"
+    B.post(day, "BQ", label, f"Payment of {len(due_now)} supplier invoices",
+           [("401000", total, 0, None, "Fournisseurs"),
+            ("512000", 0, total, None, "Virements emis")])
+    for b in due_now:
+        b["settled"] = True
+        b["paid_on"] = day.isoformat()
+    state["supplier"] = r2(state["supplier"] - total)
 
 
 def monthly_costs(day: date, m: int) -> None:
@@ -909,6 +954,34 @@ def build() -> dict:
     dso = (round(sum((date.fromisoformat(i["paid_on"]) - date.fromisoformat(i["date"])).days
                      for i in paid) / len(paid), 1) if paid else 0.0)
 
+    # Ou va chaque euro encaisse : la matiere de la page d'analyse, en langage simple
+    def part(prefixes):
+        return r2(group(prefixes) / sales * 100) if sales else 0.0
+
+    per100 = [
+        {"key": "materials", "pct": part(("601", "602", "603"))},
+        {"key": "people", "pct": part(("641", "645"))},
+        {"key": "place", "pct": part(("613", "606"))},
+        {"key": "services", "pct": part(("615", "616", "622", "623", "624", "626", "627", "635"))},
+        {"key": "wear", "pct": part(("6811",))},
+        {"key": "unpaid", "pct": part(("6817",))},
+        {"key": "bank", "pct": part(("661",))},
+    ]
+    kept = r2(100 - sum(x["pct"] for x in per100))
+    per100.append({"key": "kept", "pct": kept})
+
+    # dettes fournisseurs encore ouvertes au 30 septembre
+    open_bills = []
+    for b in bills:
+        if b["settled"]:
+            continue
+        late = (END - date.fromisoformat(b["due"])).days
+        open_bills.append({**b, "late": late})
+    open_bills.sort(key=lambda x: x["due"])
+    paid_bills = [b for b in bills if b.get("paid_on")]
+    dpo = (round(sum((date.fromisoformat(b["paid_on"]) - date.fromisoformat(b["date"])).days
+                     for b in paid_bills) / len(paid_bills), 1) if paid_bills else 0.0)
+
     # Test de resistance. Chaque client professionnel represente un encours ; si son
     # comportement de paiement devenait celui du client deja douteux, il faudrait le
     # deprecier a son tour, et la dotation est une charge. On empile les clients du plus
@@ -938,6 +1011,16 @@ def build() -> dict:
     }
 
     return {
+        "per100": per100,
+        "payables": {
+            "open": open_bills, "total": r2(sum(b["amount"] for b in open_bills)),
+            "late_total": r2(sum(b["amount"] for b in open_bills if b["late"] > 0)),
+            "count": len(open_bills), "dpo": dpo, "paid_count": len(paid_bills),
+            "next30": r2(sum(b["amount"] for b in open_bills
+                             if 0 <= (date.fromisoformat(b["due"]) - END).days <= 30)),
+            "suppliers": [{"name": k, "terms": v, "fr": TERMS[v][0], "en": TERMS[v][1]}
+                          for k, v in SUPPLIERS.items()],
+        },
         "stress": stress,
         "doubtful": [{k: d[k] for k in ("invoice", "customer", "date", "due", "amount", "ht", "late")}
                      for d in doubtful],
@@ -1057,4 +1140,6 @@ print(f"DSO reel          {r['dso']:>12} jours sur {r['paid_count']} factures pa
 st = books["stress"]
 print(f"depreciation      {st['allowance_booked']:>12,.2f}  sur {st['doubtful_count']} factures")
 print(f"bascule apres     {st['tipping']:>12}  clients de plus")
+pa = books["payables"]
+print(f"dettes ouvertes   {pa['total']:>12,.2f}  sur {pa['count']} factures, DPO {pa['dpo']} jours")
 print(f"json bytes        {(out / 'books.json').stat().st_size:>12,}")

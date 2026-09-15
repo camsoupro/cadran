@@ -121,11 +121,11 @@ export async function mountBalance(host, labels) {
     rig.rotation.y = Math.sin(tt * .25) * .3 + mx * .28;
     hub.rotation.y += .006;
     r.render(scene, cam);
-    const box = host.getBoundingClientRect();
+    const w = host.clientWidth, hh = host.clientHeight;
     pans.forEach((p, i) => {
       v.set(p.position.x, -1.8, 0).applyMatrix4(beam.matrixWorld).project(cam);
-      tags[i].style.left = ((v.x + 1) / 2 * box.width).toFixed(1) + "px";
-      tags[i].style.top = ((1 - v.y) / 2 * box.height).toFixed(1) + "px";
+      tags[i].style.transform =
+        `translate(-50%,-50%) translate(${((v.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v.y) / 2 * hh).toFixed(1)}px)`;
     });
   };
   tickers.add(tick);
@@ -139,7 +139,7 @@ export async function mountBalance(host, labels) {
 }
 
 /** One volume per analytic centre, growing out of the zero line. */
-export async function mountCentres(host, centres, fmt) {
+export async function mountCentres(host, centres, fmt, opts = {}) {
   const T = reduced ? null : await three();
   if (!T) {
     host.innerHTML = `<p style="font-size:12px;color:var(--ink-3);line-height:1.9">` +
@@ -149,8 +149,8 @@ export async function mountCentres(host, centres, fmt) {
   const r = renderer(T, host);
   const scene = new T.Scene();
   const cam = new T.PerspectiveCamera(30, host.clientWidth / host.clientHeight, .1, 60);
-  cam.position.set(.9, 2.1, 11);
-  cam.lookAt(0, -.12, 0);
+  cam.position.set(opts.camX ?? .9, opts.camY ?? 2.1, opts.camZ ?? 11);
+  cam.lookAt(0, opts.lookY ?? -.12, 0);
   scene.add(new T.AmbientLight(0xffffff, .8));
   const key = new T.DirectionalLight(0xffffff, 1.5); key.position.set(4, 7, 6); scene.add(key);
   const fill = new T.DirectionalLight(0xffffff, .5); fill.position.set(-5, 2, -4); scene.add(fill);
@@ -160,17 +160,22 @@ export async function mountCentres(host, centres, fmt) {
   const layer = document.createElement("div"); layer.className = "lab"; host.append(layer);
   const blocks = [];
 
+  const spacing = opts.spacing ?? 1.6;
+  const width = opts.width ?? .96;
   centres.forEach((c, i) => {
-    const height = Math.max(.12, Math.abs(c.result) / maxAbs * 2.0);
+    const height = Math.max(.12, Math.abs(c.result) / maxAbs * (opts.tall ?? 2.0));
     const up = c.result > 0, flat = c.result === 0;
-    const geo = new T.BoxGeometry(.96, height, .96);
+    const geo = new T.BoxGeometry(width, height, width);
     geo.translate(0, up ? height / 2 : -height / 2, 0);
     const mat = new T.MeshStandardMaterial({ roughness: .55, metalness: .05, transparent: true,
       opacity: flat ? .35 : .95 });
     const mesh = new T.Mesh(geo, mat);
-    mesh.position.x = (i - (centres.length - 1) / 2) * 1.6;
+    mesh.position.x = (i - (centres.length - 1) / 2) * spacing;
     mesh.scale.y = .001;
-    mesh.userData = { c, up, flat, labelY: up ? height + .48 : -height - .48 };
+    // une etiquette sur deux est remontee : sinon elles se chevauchent des qu'il y a
+    // beaucoup de barres cote a cote
+    const lift = opts.stagger && i % 2 ? .42 : 0;
+    mesh.userData = { c, up, flat, labelY: up ? height + .48 + lift : -height - .48 - lift };
     group.add(mesh); blocks.push(mesh);
 
     const edgeMat = new T.LineBasicMaterial({ transparent: true, opacity: .5 });
@@ -190,7 +195,9 @@ export async function mountCentres(host, centres, fmt) {
   const paint = () => {
     const pos = new T.Color(hex("--pos")), neg = new T.Color(hex("--neg")), ink3 = new T.Color(hex("--ink-3"));
     for (const b of blocks) {
-      b.material.color.copy(b.userData.flat ? ink3 : b.userData.up ? pos : neg);
+      const custom = opts.colour && opts.colour(b.userData.c);
+      b.material.color.copy(custom ? new T.Color(hex(custom))
+        : b.userData.flat ? ink3 : b.userData.up ? pos : neg);
       b.userData.edgeMat.color.setHex(hex("--ink"));
       b.userData.edgeMat.opacity = document.documentElement.dataset.theme === "night" ? .32 : .5;
     }
@@ -249,26 +256,40 @@ export async function mountCentres(host, centres, fmt) {
   const io = new IntersectionObserver(e => { seen = e[0].isIntersecting; if (seen) grow(); }, { threshold: .2 });
   io.observe(host);
   const growTimer = setTimeout(grow, 2000);
+  // Filet de securite : si les images ne viennent pas (onglet en arriere plan, capture
+  // d'ecran, impression), les volumes doivent quand meme etre a leur hauteur.
+  const settleTimer = setTimeout(() => {
+    let moved = false;
+    for (const b of blocks) if (b.scale.y < .99) { b.scale.y = 1; moved = true; }
+    if (moved) { seen = true; tick(); }
+  }, 2600);
 
   const v = new T.Vector3();
-  let tt = 0;
+  let tt = 0, frame = 0;
+  // La taille du cadre ne change qu'au redimensionnement : la relire a chaque image
+  // forcerait un recalcul de mise en page soixante fois par seconde.
+  let box = { width: host.clientWidth, height: host.clientHeight };
+  const measure = () => { box = { width: host.clientWidth, height: host.clientHeight }; };
+  addEventListener("resize", measure);
+
   const tick = () => {
     if (!seen) return;
     tt += .008;
     group.rotation.y = Math.sin(tt * .4) * .12;
     r.render(scene, cam);
-    const box = host.getBoundingClientRect();
+    if (frame++ % 2) return;            // les etiquettes suivent une image sur deux
     for (const b of blocks) {
       v.set(b.position.x, b.userData.labelY * b.scale.y, 0).applyMatrix4(group.matrixWorld).project(cam);
-      b.userData.tag.style.left = ((v.x + 1) / 2 * box.width).toFixed(1) + "px";
-      b.userData.tag.style.top = ((1 - v.y) / 2 * box.height).toFixed(1) + "px";
+      b.userData.tag.style.transform =
+        `translate(-50%,-50%) translate(${((v.x + 1) / 2 * box.width).toFixed(1)}px, ${((1 - v.y) / 2 * box.height).toFixed(1)}px)`;
     }
   };
   tickers.add(tick);
   seen = true; tick();          // one frame straight away, in case rAF is throttled
 
   return () => {
-    tickers.delete(tick); painters.delete(paint); io.disconnect(); clearTimeout(growTimer);
+    tickers.delete(tick); painters.delete(paint); io.disconnect();
+    clearTimeout(growTimer); clearTimeout(settleTimer); removeEventListener("resize", measure);
     host.removeEventListener("pointermove", onHover);
     host.removeEventListener("pointerleave", onLeave);
     removeEventListener("resize", onResize);

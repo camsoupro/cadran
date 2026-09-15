@@ -120,7 +120,7 @@ h2.head em{font-style:italic; color:var(--accent)}
 .scene{width:100%; height:320px; position:relative}
 .scene canvas{display:block}
 .lab{position:absolute; inset:0; pointer-events:none; overflow:hidden}
-.lab span{position:absolute; transform:translate(-50%,-50%); text-align:center; white-space:nowrap;
+.lab span{position:absolute; top:0; left:0; transform:translate(-50%,-50%); text-align:center; white-space:nowrap; will-change:transform;
   font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); line-height:1.5}
 .lab span b{display:block; font-family:var(--mono); font-size:11.5px; letter-spacing:0; text-transform:none; color:var(--ink)}
 .scene-note{text-align:center; font-size:11px; color:var(--ink-3); margin:4px 0 0}
