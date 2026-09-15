@@ -399,7 +399,7 @@ BILLS_OF_MATERIALS = [
 # ----------------------------------------------------------------- campagnes
 CAMPAIGNS = [
     {"ref": "CP-01", "fr": "Lancement du coffret découverte", "en": "Discovery box launch",
-     "channel_fr": "Reseaux sociaux", "channel_en": "Social media",
+     "channel_fr": "Réseaux sociaux", "channel_en": "Social media",
      "from": "2026-03-02", "to": "2026-04-15", "budget": 3200.0, "orders": 214, "revenue": 6890.0},
     {"ref": "CP-02", "fr": "Référencement du site", "en": "Search advertising",
      "channel_fr": "Recherche payante", "channel_en": "Paid search",
