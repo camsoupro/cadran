@@ -1321,6 +1321,195 @@ function activity(D, go) {
   };
 }
 
+
+// ============================================================== prices and costs
+
+function prices(D) {
+  const pb = D.price_book || {}, products = D.products || [];
+  const famTable = (key, title) => h("div", {},
+    h("p", { class: "caps", style: { margin: "30px 0 10px" }, text: title }),
+    table([
+      { label: t("prRef"), c: true, render: r => r.ref },
+      { label: t("prDesignation"), render: r => pick(r.fr, r.en) },
+      { label: t("prUnit"), hide: true, render: r => r.unit },
+      { label: t("prSupplier"), hide: true, render: r => r.supplier || "-" },
+      { label: t("prUnitPrice"), n: true, render: r => num(r.price) },
+    ], pb[key] || []));
+
+  // fiche produit : la nomenclature deroulee
+  const sheet = p2 => h("div", { class: "entry-sheet", style: { marginBottom: "18px" } },
+    h("div", { class: "entry-top" },
+      h("span", { class: "ref", text: p2.ref }),
+      h("span", { class: "memo", text: pick(p2.fr, p2.en) }),
+      h("span", { class: "caps", text: t("prSellPrice") + " " + num(p2.price) }),
+      h("span", { class: "stamp", text: t("prMarginPct") + " " + num(p2.margin_pct, 1) + " %" })),
+    table([
+      { label: t("prDesignation"), render: l => h("span", {}, pick(l.fr, l.en),
+        h("small", { text: l.ref + ", " + pick(l.source_fr, l.source_en) })) },
+      { label: t("prQty"), n: true, render: l => num(l.qty, 3) + " " + l.unit },
+      { label: t("prUnitPrice"), n: true, hide: true, render: l => num(l.unit_price) },
+      { label: t("prAmount"), n: true, render: l => num(l.amount) },
+    ], p2.lines, {
+      foot: h("tr", {}, h("td", { colspan: 3, text: t("prCost") }),
+        h("td", { class: "n", text: num(p2.cost) })),
+    }),
+    h("div", { class: "chips", style: { marginTop: "14px" } },
+      h("span", { class: "chip" }, t("prMargin"), " ", h("b", { class: "pos", text: num(p2.margin) })),
+      h("span", { class: "chip" }, t("prCoef"), " ", h("b", { text: "x" + num(p2.coefficient, 2) }))));
+
+  // ---- simulateur
+  const pick0 = products[0] || { lines: [], cost: 0, price: 0 };
+  const sel = h("select", {}, products.map(p2 =>
+    h("option", { value: p2.ref, text: pick(p2.fr, p2.en) })));
+  const greenOf = p2 => {
+    const l = (p2.lines || []).find(x => x.ref.startsWith("MP-"));
+    return l ? l.unit_price : 6.10;
+  };
+  const green = h("input", { type: "number", step: "0.05", value: String(greenOf(pick0)),
+    min: "1", max: "30" });
+  const yieldIn = h("input", { type: "number", step: "0.5", value: "84", min: "60", max: "95" });
+  const priceIn = h("input", { type: "number", step: "0.10", value: String(pick0.price), min: "0" });
+  const out = h("div", { style: { marginTop: "18px" } });
+
+  const recompute = () => {
+    const p2 = products.find(x => x.ref === sel.value) || pick0;
+    const g = parseFloat(green.value) || 0;
+    const y = (parseFloat(yieldIn.value) || 84) / 100;
+    const sell = parseFloat(priceIn.value) || 0;
+    // on refait le calcul : le cafe vert suit le prix et le rendement saisis,
+    // le reste de la nomenclature ne bouge pas
+    let cost = 0;
+    for (const l of p2.lines) {
+      const isGreen = l.ref.startsWith("MP-");
+      // la quantite de vert d'origine vaut poids / rendement de reference
+      cost += isGreen ? (l.qty * 0.84 / y) * g : l.amount;
+    }
+    cost = Math.round(cost * 100) / 100;
+    const margin = Math.round((sell - cost) * 100) / 100;
+    const pct = sell ? margin / sell * 100 : 0;
+    out.innerHTML = "";
+    out.append(
+      h("div", { class: "chips", style: { marginTop: 0 } },
+        h("span", { class: "chip" }, t("prSimResult"), " ", h("b", { text: num(cost) })),
+        h("span", { class: "chip" }, t("prMargin"), " ",
+          h("b", { class: margin >= 0 ? "pos" : "neg", text: num(margin) })),
+        h("span", { class: "chip" }, t("prMarginPct"), " ",
+          h("b", { class: margin >= 0 ? "pos" : "neg", text: num(pct, 1) + " %" })),
+        h("span", { class: "chip" }, t("prSimBreak"), " ", h("b", { text: num(cost) }))),
+      h("p", { class: "reading", style: { marginTop: "14px" },
+        html: margin < 0 ? t("prSimWarn")
+          : t("prSimOk", { margin: money(margin), pct: num(pct, 1) + " %" }) }));
+  };
+  [sel, green, yieldIn, priceIn].forEach(el => el.addEventListener("input", recompute));
+  sel.addEventListener("change", () => {
+    const p2 = products.find(x => x.ref === sel.value);
+    if (p2) { priceIn.value = String(p2.price); green.value = String(greenOf(p2)); }
+    recompute();
+  });
+
+  const node = h("div", {},
+    section(t("prTitleBook"), null, reading(t("prReadBook")),
+      h("p", { class: "caps", style: { margin: "6px 0 10px" }, text: t("prProducts") }),
+      h("div", {}, products.map(sheet)),
+      h("p", { class: "caps", style: { margin: "34px 0 8px" }, text: t("prSim") }),
+      reading(t("prSimRead")),
+      h("div", { class: "sandbox" },
+        h("div", { class: "filters" },
+          h("span", { class: "caps", text: t("prSimProduct") }), sel,
+          h("span", { class: "caps", text: t("prSimGreen") }), green,
+          h("span", { class: "caps", text: t("prSimYield") }), yieldIn,
+          h("span", { class: "caps", text: t("prSimPrice") }), priceIn),
+        out),
+      famTable("materials", t("prMaterials")),
+      famTable("packaging", t("prPackaging")),
+      famTable("services", t("prServices")),
+      famTable("overheads", t("prOverheads"))));
+  queueMicrotask(recompute);
+  return { node };
+}
+
+// ============================================================== schedule
+
+const PL_KIND = { client: "plKClient", fournisseur: "plKFournisseur", fiscal: "plKFiscal",
+  paie: "plKPaie", social: "plKSocial", suivi: "plKSuivi" };
+
+function planner(D, go) {
+  const ag = D.agenda || { all: [], late: [], soon: [] };
+  const cols = [
+    { label: t("cDate"), render: r => dateAuto(r.date) },
+    { label: t("plKind"), hide: true, render: r => t(PL_KIND[r.kind] || "plKSuivi") },
+    { label: t("prRef"), c: true, hide: true, render: r => r.ref },
+    { label: t("plWhat"), render: r => pick(r.fr, r.en) },
+    { label: t("cAmount"), n: true, cls: r => tone(r.amount),
+      render: r => r.amount ? num(r.amount) : "-" },
+  ];
+
+  return {
+    node: h("div", {},
+      section(t("plTitle"), null, reading(t("plRead")),
+        h("div", { class: "figs" },
+          figure(t("plLate"), String(ag.late.length), t("plReminder", { n: ag.late.length }),
+            ag.late.length ? "neg" : ""),
+          figure(t("plSoon"), String(ag.soon.length), t("plSoon")),
+          figure(t("plImpact"), money(ag.soon_amount, { compact: true }), t("plSoon"),
+            tone(ag.soon_amount)),
+          figure(t("cTotal"), String(ag.all.length), t("plTitle"))),
+        callout(t("plWhy"), t("plWhyText", { impact: money(ag.soon_amount) })),
+        h("p", { class: "caps", style: { margin: "32px 0 10px" }, text: t("plLate") }),
+        ag.late.length ? table(cols, ag.late) : h("p", { class: "muted", text: t("plNothing") }),
+        h("p", { class: "caps", style: { margin: "32px 0 10px" }, text: t("plSoon") }),
+        ag.soon.length ? table(cols, ag.soon) : h("p", { class: "muted", text: t("plNothing") }))),
+  };
+}
+
+// ============================================================== campaigns
+
+function campaigns(D) {
+  const cs = D.campaigns || [];
+  if (!cs.length) return { node: section(t("cpTitle"), null, h("p", { class: "muted", text: "-" })) };
+  const best = cs[0], worst = cs[cs.length - 1];
+  const maxReturn = Math.max(...cs.map(c => c.return_per_euro), 1);
+
+  return {
+    node: h("div", {},
+      section(t("cpTitle"), null, reading(t("cpRead")),
+        h("div", { class: "figs" },
+          figure(t("cpSpent"), money(cs.reduce((a, c) => a + c.spent, 0), { compact: true }),
+            "623 " + t("cpTitle").toLowerCase()),
+          figure(t("cpOrders"), num(cs.reduce((a, c) => a + c.orders, 0), 0), t("cpOrders")),
+          figure(t("cpRevenue"), money(cs.reduce((a, c) => a + c.revenue, 0), { compact: true }),
+            t("cpRevenue")),
+          figure(t("cpReturn"),
+            "x" + num(cs.reduce((a, c) => a + c.revenue, 0) / cs.reduce((a, c) => a + c.spent, 0), 2),
+            t("cpReturn"), "pos")),
+        h("div", { style: { margin: "30px 0 0" } },
+          bars(cs.map(c => ({
+            label: pick(c.fr, c.en).slice(0, 30), value: c.return_per_euro,
+            tone: c.return_per_euro >= 1 ? "pos" : "neg",
+            display: "x" + num(c.return_per_euro, 2),
+          })))),
+        h("p", { class: "caps", style: { margin: "34px 0 10px" }, text: t("cpTitle") }),
+        table([
+          { label: t("prRef"), c: true, render: c => c.ref },
+          { label: t("prDesignation"), render: c => h("span", {}, pick(c.fr, c.en),
+            h("small", { text: pick(c.channel_fr, c.channel_en) })) },
+          { label: t("cpPeriod"), hide: true, render: c => dateAuto(c.from) + " – " + dateAuto(c.to) },
+          { label: t("cpBudget"), n: true, hide: true, render: c => num(c.budget) },
+          { label: t("cpSpent"), n: true, render: c => num(c.spent) },
+          { label: t("cpOrders"), n: true, render: c => num(c.orders, 0) },
+          { label: t("cpPerOrder"), n: true, hide: true, render: c => num(c.cost_per_order) },
+          { label: t("cpRevenue"), n: true, render: c => num(c.revenue) },
+          { label: t("cpReturn"), n: true, cls: c => c.return_per_euro >= 1 ? "pos" : "neg",
+            render: c => "x" + num(c.return_per_euro, 2) },
+        ], cs),
+        callout(t("cpBest"), t("cpBestText", {
+          best: pick(best.fr, best.en), bestReturn: num(best.return_per_euro, 2),
+          bestCost: money(best.cost_per_order),
+          worst: pick(worst.fr, worst.en), worstReturn: num(worst.return_per_euro, 2),
+        })))),
+  };
+}
+
 // ============================================================== registry
 
 export const PAGES = {
@@ -1341,5 +1530,8 @@ export const PAGES = {
   "payables": { title: "pPayables", crumb: "navManagement", render: payables },
   "analysis": { title: "pAnalysis", crumb: "navLearn", render: analysis },
   "activity": { title: "pActivity", crumb: "navRecord", render: activity },
+  "prices": { title: "pPrices", crumb: "navSteer", render: prices },
+  "planner": { title: "pPlanner", crumb: "navSteer", render: planner },
+  "campaigns": { title: "pCampaigns", crumb: "navSteer", render: campaigns },
   "exports": { title: "pExports", crumb: "navStatements", render: exportsPage },
 };

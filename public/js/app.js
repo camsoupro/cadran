@@ -33,6 +33,9 @@ const NAV = [
       const n = (d.receivables.open || []).filter(o => o.late > 0).length;
       return n ? String(n) : "";
     }]]],
+  ["navSteer", [["prices", "pPrices", d => String((d.products || []).length)],
+    ["planner", "pPlanner", d => String(((d.agenda || { late: [] }).late).length)],
+    ["campaigns", "pCampaigns", d => String((d.campaigns || []).length)]]],
   ["navStatements", [["income", "pIncome"], ["balance", "pBalance"], ["exports", "pExports"]]],
   ["navLearn", [["analysis", "pAnalysis"], ["tutorial", "pTutorial"]]],
 ];
@@ -80,12 +83,21 @@ function buildRail() {
       h("div", { html: `${num(D.meta.entries, 0)} ${t("entriesPosted")}<br>${num(D.meta.lines, 0)} ${t("linesPosted")}<br>${t("fictional")}` })));
 }
 
+function reminder() {
+  const late = ((D.agenda || { late: [] }).late || []).length;
+  if (!late) return null;
+  return h("a", { class: "btn bell", href: "#/planner", title: t("plLate") },
+    icon('<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>', 14),
+    String(late));
+}
+
 function buildTop(page) {
   return h("header", { class: "topline" },
     h("div", {},
       h("div", { class: "crumb", text: t(page.crumb) + " › " + t(page.title) }),
       h("h1", { text: t(page.title) })),
     h("div", { class: "tools" },
+      reminder(),
       h("button", {
         class: "btn", text: t("langLabel"), title: "Français / English",
         onclick: () => {
@@ -142,7 +154,7 @@ async function render() {
     h("span", { class: "brand" },
       logo(24),
       h("span", { class: "wordmark" }, "Cadran", h("span", { text: "." }))),
-    h("span", { class: "here", text: t(page.title) }));
+    h("span", { class: "here" }, t(page.title), reminder()));
 
   const app = h("div", { class: "app" }, rail, main);
   document.body.replaceChildren(bar, scrim, app);

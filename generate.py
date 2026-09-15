@@ -28,7 +28,7 @@ random.seed(20260930)
 # --------------------------------------------------------------------------- company
 
 COMPANY = {
-    "name": "Brulerie du Cadran",
+    "name": "Brûlerie du Cadran",
     "legal": "SAS au capital de 60 000 EUR",
     "siren": "000 000 000",
     "vat": "FR 00 000 000 000",
@@ -37,7 +37,7 @@ COMPANY = {
     "address": "14 rue des Remparts",
     "postal": "69007 Lyon",
     "city": "Lyon 7e",
-    "activity_fr": "Torrefaction de cafe, vente en boutique, en ligne et aux professionnels",
+    "activity_fr": "Torréfaction de café, vente en boutique, en ligne et aux professionnels",
     "activity_en": "Coffee roasting, sold in the shop, online and to trade customers",
     "fiscal_from": "2026-01-01",
     "fiscal_to": "2026-12-31",
@@ -53,54 +53,62 @@ END = date(2026, 9, 30)
 # (number, fr, en, kind)  kind: asset | liability | equity | expense | income
 ACCOUNTS: list[tuple[str, str, str, str]] = [
     ("101000", "Capital social", "Share capital", "equity"),
-    ("106100", "Reserve legale", "Legal reserve", "equity"),
-    ("110000", "Report a nouveau", "Retained earnings", "equity"),
-    ("120000", "Resultat de l'exercice", "Profit for the year", "equity"),
-    ("164000", "Emprunts aupres des etablissements de credit", "Bank loans", "liability"),
+    ("106100", "Réserve légale", "Legal reserve", "equity"),
+    ("110000", "Report à nouveau", "Retained earnings", "equity"),
+    ("120000", "Résultat de l'exercice", "Profit for the year", "equity"),
+    ("164000", "Emprunts auprès des établissements de crédit", "Bank loans", "liability"),
     ("205000", "Logiciels", "Software", "asset"),
     ("213500", "Installations et agencements", "Fixtures and fittings", "asset"),
-    ("215400", "Materiel industriel, torrefacteur", "Plant and machinery, roaster", "asset"),
-    ("218300", "Materiel de bureau et informatique", "Office and IT equipment", "asset"),
+    ("215400", "Matériel industriel, torréfacteur", "Plant and machinery, roaster", "asset"),
+    ("218300", "Matériel de bureau et informatique", "Office and IT equipment", "asset"),
     ("280500", "Amortissements des logiciels", "Accumulated depreciation, software", "asset"),
     ("281350", "Amortissements des agencements", "Accumulated depreciation, fixtures", "asset"),
-    ("281540", "Amortissements du materiel industriel", "Accumulated depreciation, plant", "asset"),
-    ("281830", "Amortissements du materiel de bureau", "Accumulated depreciation, office", "asset"),
-    ("310000", "Stock de cafe vert", "Green coffee inventory", "asset"),
+    ("281540", "Amortissements du matériel industriel", "Accumulated depreciation, plant", "asset"),
+    ("281830", "Amortissements du matériel de bureau", "Accumulated depreciation, office", "asset"),
+    ("310000", "Stock de café vert", "Green coffee inventory", "asset"),
     ("320000", "Stock d'emballages et fournitures", "Packaging and supplies inventory", "asset"),
-    ("355000", "Stock de cafe torrefie", "Roasted coffee inventory", "asset"),
+    ("355000", "Stock de café torréfié", "Roasted coffee inventory", "asset"),
     ("401000", "Fournisseurs", "Trade payables", "liability"),
     ("411000", "Clients", "Trade receivables", "asset"),
     ("416000", "Clients douteux", "Doubtful trade receivables", "asset"),
-    ("491000", "Depreciations des comptes clients", "Allowance for doubtful debts", "asset"),
-    ("421000", "Personnel, remunerations dues", "Wages payable", "liability"),
-    ("431000", "Securite sociale et organismes sociaux", "Social security payable", "liability"),
-    ("445510", "TVA a decaisser", "VAT payable", "liability"),
-    ("445660", "TVA deductible", "Input VAT", "asset"),
-    ("445710", "TVA collectee", "Output VAT", "liability"),
+    ("491000", "Dépréciations des comptes clients", "Allowance for doubtful debts", "asset"),
+    ("421000", "Personnel, rémunérations dues", "Wages payable", "liability"),
+    ("431000", "Sécurité sociale et organismes sociaux", "Social security payable", "liability"),
+    ("445510", "TVA à décaisser", "VAT payable", "liability"),
+    ("445660", "TVA déductible", "Input VAT", "asset"),
+    ("445710", "TVA collectée", "Output VAT", "liability"),
     ("512000", "Banque", "Bank", "asset"),
     ("530000", "Caisse", "Cash in hand", "asset"),
-    ("601000", "Achats de cafe vert", "Purchases of green coffee", "expense"),
+    ("601000", "Achats de café vert", "Purchases of green coffee", "expense"),
     ("602100", "Achats d'emballages et fournitures", "Purchases of packaging and supplies", "expense"),
-    ("603100", "Variation des stocks de cafe vert", "Change in green coffee inventory", "expense"),
+    ("603100", "Variation des stocks de café vert", "Change in green coffee inventory", "expense"),
     ("603200", "Variation des stocks d'emballages", "Change in packaging inventory", "expense"),
-    ("606100", "Energie, electricite et gaz", "Energy, electricity and gas", "expense"),
-    ("606300", "Petit equipement et entretien", "Small equipment and maintenance", "expense"),
-    ("613200", "Locations immobilieres", "Property rent", "expense"),
-    ("615500", "Entretien et reparations", "Repairs and maintenance", "expense"),
+    ("604000", "Achats d'études et de prestations", "Purchased studies and services", "expense"),
+    ("605000", "Achats de matériel et d'outillage", "Purchases of equipment and tooling", "expense"),
+    ("606100", "Énergie, électricité et gaz", "Energy, electricity and gas", "expense"),
+    ("606800", "Vêtements de travail et hygiène", "Workwear and hygiene", "expense"),
+    ("611000", "Sous-traitance générale", "Subcontracting", "expense"),
+    ("613500", "Locations mobilières", "Equipment hire", "expense"),
+    ("618000", "Documentation et abonnements", "Subscriptions and documentation", "expense"),
+    ("625100", "Déplacements et missions", "Travel and subsistence", "expense"),
+    ("628000", "Frais divers de gestion", "Other operating charges", "expense"),
+    ("606300", "Petit équipement et entretien", "Small equipment and maintenance", "expense"),
+    ("613200", "Locations immobilières", "Property rent", "expense"),
+    ("615500", "Entretien et réparations", "Repairs and maintenance", "expense"),
     ("616000", "Primes d'assurance", "Insurance", "expense"),
     ("622600", "Honoraires, expert comptable", "Professional fees, accountant", "expense"),
-    ("623100", "Publicite et marketing", "Advertising and marketing", "expense"),
+    ("623100", "Publicité et marketing", "Advertising and marketing", "expense"),
     ("624100", "Transports sur ventes", "Delivery costs on sales", "expense"),
-    ("626000", "Frais postaux et telecommunications", "Post and telecommunications", "expense"),
+    ("626000", "Frais postaux et télécommunications", "Post and telecommunications", "expense"),
     ("627000", "Services bancaires", "Bank charges", "expense"),
-    ("635100", "Impots et taxes, CFE", "Local business tax", "expense"),
+    ("635100", "Impôts et taxes, CFE", "Local business tax", "expense"),
     ("641100", "Salaires et traitements", "Wages and salaries", "expense"),
-    ("645100", "Charges de securite sociale", "Social security contributions", "expense"),
-    ("661100", "Interets des emprunts", "Interest on loans", "expense"),
+    ("645100", "Charges de sécurité sociale", "Social security contributions", "expense"),
+    ("661100", "Intérêts des emprunts", "Interest on loans", "expense"),
     ("681100", "Dotations aux amortissements", "Depreciation charge", "expense"),
-    ("681740", "Dotations aux depreciations des creances", "Charge for doubtful debts", "expense"),
-    ("701000", "Ventes de cafe torrefie", "Sales of roasted coffee", "income"),
-    ("706000", "Prestations, bar et degustations", "Services, counter and tastings", "income"),
+    ("681740", "Dotations aux dépréciations des créances", "Charge for doubtful debts", "expense"),
+    ("701000", "Ventes de café torréfié", "Sales of roasted coffee", "income"),
+    ("706000", "Prestations, bar et dégustations", "Services, counter and tastings", "income"),
     ("708500", "Ports factures", "Delivery income", "income"),
     ("713500", "Variation des stocks de produits finis", "Change in finished goods inventory", "income"),
 ]
@@ -113,12 +121,12 @@ JOURNALS = [
     ("CA", "Caisse", "Cash"),
     ("PA", "Paie", "Payroll"),
     ("ST", "Stocks et production", "Inventory and production"),
-    ("OD", "Operations diverses", "General"),
+    ("OD", "Opérations diverses", "General"),
 ]
 JOURNAL_NAMES = {c: (fr, en) for c, fr, en in JOURNALS}
 
 CENTRES = [
-    ("TOR", "Atelier de torrefaction", "Roasting workshop", "cost"),
+    ("TOR", "Atelier de torréfaction", "Roasting workshop", "cost"),
     ("BTQ", "Boutique du Cadran", "Cadran shop", "profit"),
     ("WEB", "Boutique en ligne", "Online shop", "profit"),
     ("GRO", "Ventes aux professionnels", "Trade sales", "profit"),
@@ -187,41 +195,41 @@ B = Books()
 # --------------------------------------------------------------------------- opening
 
 OPENING = [
-    ("215400", 146_000, 0, None, "Torrefacteur 25 kg et hotte"),
+    ("215400", 146_000, 0, None, "Torréfacteur 25 kg et hotte"),
     ("213500", 58_400, 0, None, "Agencement de la boutique"),
-    ("218300", 11_900, 0, None, "Materiel de bureau et informatique"),
+    ("218300", 11_900, 0, None, "Matériel de bureau et informatique"),
     ("205000", 6_800, 0, None, "Logiciel de caisse et de gestion"),
-    ("281540", 0, 43_800, None, "Amortissements anterieurs, torrefacteur"),
-    ("281350", 0, 17_520, None, "Amortissements anterieurs, agencement"),
-    ("281830", 0, 5_950, None, "Amortissements anterieurs, bureau"),
-    ("280500", 0, 3_400, None, "Amortissements anterieurs, logiciel"),
-    ("310000", 61_450, 0, None, "Stock de cafe vert au 31 decembre 2025"),
-    ("320000", 8_260, 0, None, "Stock d'emballages au 31 decembre 2025"),
-    ("355000", 24_180, 0, None, "Stock de cafe torrefie au 31 decembre 2025"),
-    ("411000", 57_300, 0, None, "Clients professionnels au 31 decembre 2025"),
-    ("512000", 84_260, 0, None, "Solde bancaire au 31 decembre 2025"),
+    ("281540", 0, 43_800, None, "Amortissements antérieurs, torréfacteur"),
+    ("281350", 0, 17_520, None, "Amortissements antérieurs, agencement"),
+    ("281830", 0, 5_950, None, "Amortissements antérieurs, bureau"),
+    ("280500", 0, 3_400, None, "Amortissements antérieurs, logiciel"),
+    ("310000", 61_450, 0, None, "Stock de café vert au 31 décembre 2025"),
+    ("320000", 8_260, 0, None, "Stock d'emballages au 31 décembre 2025"),
+    ("355000", 24_180, 0, None, "Stock de café torréfié au 31 décembre 2025"),
+    ("411000", 57_300, 0, None, "Clients professionnels au 31 décembre 2025"),
+    ("512000", 84_260, 0, None, "Solde bancaire au 31 décembre 2025"),
     ("530000", 1_450, 0, None, "Caisse de la boutique"),
-    ("401000", 0, 39_870, None, "Fournisseurs au 31 decembre 2025"),
+    ("401000", 0, 39_870, None, "Fournisseurs au 31 décembre 2025"),
     ("431000", 0, 14_260, None, "Charges sociales du 4e trimestre 2025"),
-    ("445510", 0, 6_190, None, "TVA de decembre 2025"),
-    ("164000", 0, 118_400, None, "Emprunt torrefacteur, solde"),
+    ("445510", 0, 6_190, None, "TVA de décembre 2025"),
+    ("164000", 0, 118_400, None, "Emprunt torréfacteur, solde"),
     ("101000", 0, 60_000, None, "Capital social"),
-    ("106100", 0, 6_000, None, "Reserve legale"),
+    ("106100", 0, 6_000, None, "Réserve légale"),
 ]
 _od = sum(l[1] for l in OPENING)
 _oc = sum(l[2] for l in OPENING)
-OPENING.append(("110000", 0, r2(_od - _oc), None, "Report a nouveau"))
-B.post(START, "OD", "A nouveaux au 1er janvier 2026", "Opening balances, 1 January 2026",
+OPENING.append(("110000", 0, r2(_od - _oc), None, "Report à nouveau"))
+B.post(START, "OD", "À nouveaux au 1er janvier 2026", "Opening balances, 1 January 2026",
        [(a, d, c, ce, lb) for a, d, c, ce, lb in OPENING], piece="AN-2026")
 
 # --------------------------------------------------------------------------- products
 
 ORIGINS = [
-    ("Bresil Cerrado", "Brazil Cerrado", 5.10),
-    ("Ethiopie Sidamo", "Ethiopia Sidamo", 7.80),
+    ("Brésil Cerrado", "Brazil Cerrado", 5.10),
+    ("Éthiopie Sidamo", "Ethiopia Sidamo", 7.80),
     ("Colombie Huila", "Colombia Huila", 6.40),
     ("Guatemala Antigua", "Guatemala Antigua", 6.90),
-    ("Perou bio", "Peru organic", 6.15),
+    ("Pérou bio", "Peru organic", 6.15),
 ]
 STD_GREEN_PRICE = 6.10          # standard cost of green coffee, EUR per kg
 STD_YIELD = 0.84                # standard roasting yield, 16 % weight loss
@@ -232,7 +240,7 @@ STD_COST = r2(STD_GREEN_PRICE / STD_YIELD + STD_PACKAGING + STD_CONVERSION)
 PRICES = {           # EUR per kg, excluding VAT
     "BTQ": 27.90,
     "WEB": 26.40,
-    "GRO": 15.90,
+    "GRO": 16.75,
 }
 
 state = {
@@ -279,15 +287,15 @@ def due_date(invoice_day: date, terms: str) -> date:
 # Les volumes different d'un client a l'autre, c'est ce qui donne aux montants une
 # dispersion realiste : un petit cafe prend 8 kg, un grossiste en prend 600.
 TRADE_CUSTOMERS = [
-    ("Cafe des Artisans", "Lyon 1er", "000 111 222", "30fdm", 9, 26),
-    ("Hotel Bellecour", "Lyon 2e", "000 222 333", "45fdm", 60, 190),
+    ("Café des Artisans", "Lyon 1er", "000 111 222", "30fdm", 9, 26),
+    ("Hôtel Bellecour", "Lyon 2e", "000 222 333", "45fdm", 60, 190),
     ("Restaurant La Passerelle", "Lyon 6e", "000 333 444", "30n", 18, 48),
-    ("Epicerie Bonne Graine", "Villeurbanne", "000 444 555", "30fdm", 25, 90),
+    ("Épicerie Bonne Graine", "Villeurbanne", "000 444 555", "30fdm", 25, 90),
     ("Bureau Partage Confluence", "Lyon 2e", "000 555 666", "45fdm", 12, 35),
     ("Boulangerie Saint-Jean", "Lyon 5e", "000 666 777", "30n", 14, 40),
-    ("Cantine Numerique", "Villeurbanne", "000 777 888", "45fdm", 30, 110),
-    ("Grossiste Rhone Cafes", "Corbas", "000 888 999", "45fdm", 280, 620),
-    ("Chaine Le Comptoir", "Lyon 3e", "000 999 111", "30fdm", 120, 340),
+    ("Cantine Numérique", "Villeurbanne", "000 777 888", "45fdm", 30, 110),
+    ("Grossiste Rhône Cafés", "Corbas", "000 888 999", "45fdm", 280, 620),
+    ("Chaîne Le Comptoir", "Lyon 3e", "000 999 111", "30fdm", 120, 340),
 ]
 
 # Penalites de retard : taux directeur BCE majore de dix points, plus l'indemnite
@@ -304,9 +312,108 @@ bill_no = 0
 # Les fournisseurs accordent eux aussi des delais : c'est la moitie qu'on oublie
 # toujours de regarder quand on suit une tresorerie.
 SUPPLIERS = {
-    "Belco, cafe vert": "30fdm",
+    "Belco, café vert": "30fdm",
     "Packstore, emballages": "30n",
 }
+
+
+# ----------------------------------------------------------------- base de prix
+# Ce que paie l'entreprise, poste par poste. C'est la matiere du calcul de cout de
+# revient : un entrepreneur doit pouvoir refaire le calcul lui-meme, sans comptable.
+PRICE_BOOK = {
+    "materials": [
+        {"ref": "MP-01", "fr": "Café vert Brésil Cerrado", "en": "Green coffee, Brazil Cerrado",
+         "unit": "kg", "price": 5.10, "supplier": "Belco, café vert", "terms": "30fdm"},
+        {"ref": "MP-02", "fr": "Café vert Éthiopie Sidamo", "en": "Green coffee, Ethiopia Sidamo",
+         "unit": "kg", "price": 7.80, "supplier": "Belco, café vert", "terms": "30fdm"},
+        {"ref": "MP-03", "fr": "Café vert Colombie Huila", "en": "Green coffee, Colombia Huila",
+         "unit": "kg", "price": 6.40, "supplier": "Belco, café vert", "terms": "30fdm"},
+        {"ref": "MP-04", "fr": "Café vert Guatemala Antigua", "en": "Green coffee, Guatemala Antigua",
+         "unit": "kg", "price": 6.90, "supplier": "Belco, café vert", "terms": "30fdm"},
+        {"ref": "MP-05", "fr": "Café vert Pérou bio", "en": "Green coffee, Peru organic",
+         "unit": "kg", "price": 6.15, "supplier": "Belco, café vert", "terms": "30fdm"},
+    ],
+    "packaging": [
+        {"ref": "EM-01", "fr": "Sachet kraft 250 g avec valve", "en": "250 g kraft bag with valve",
+         "unit": "piece", "price": 0.34, "supplier": "Packstore, emballages", "terms": "30n"},
+        {"ref": "EM-02", "fr": "Sac 1 kg", "en": "1 kg bag",
+         "unit": "piece", "price": 0.62, "supplier": "Packstore, emballages", "terms": "30n"},
+        {"ref": "EM-03", "fr": "Étiquette imprimée", "en": "Printed label",
+         "unit": "piece", "price": 0.07, "supplier": "Imprimerie Rhône", "terms": "30n"},
+        {"ref": "EM-04", "fr": "Coffret carton trois sachets", "en": "Three bag gift box",
+         "unit": "piece", "price": 1.85, "supplier": "Packstore, emballages", "terms": "30n"},
+        {"ref": "EM-05", "fr": "Carton d'expédition", "en": "Shipping carton",
+         "unit": "piece", "price": 0.48, "supplier": "Packstore, emballages", "terms": "30n"},
+    ],
+    "services": [
+        {"ref": "SV-01", "fr": "Assemblage des coffrets, sous-traitance", "en": "Gift box assembly, subcontracted",
+         "unit": "coffret", "price": 1.20, "supplier": "Atelier Prisme, ESAT", "terms": "30n"},
+        {"ref": "SV-02", "fr": "Livraison professionnelle, Lyon", "en": "Trade delivery, Lyon",
+         "unit": "livraison", "price": 7.90, "supplier": "Transports Vallée", "terms": "30n"},
+        {"ref": "SV-03", "fr": "Expédition colis en ligne", "en": "Parcel shipping, online order",
+         "unit": "colis", "price": 4.35, "supplier": "Transports Vallée", "terms": "30n"},
+        {"ref": "SV-04", "fr": "Heure de main d'oeuvre atelier, chargée", "en": "Workshop labour hour, fully loaded",
+         "unit": "heure", "price": 23.80, "supplier": None, "terms": None},
+        {"ref": "SV-05", "fr": "Énergie de torréfaction", "en": "Roasting energy",
+         "unit": "kg torréfié", "price": 0.41, "supplier": "Enedis", "terms": None},
+    ],
+    "overheads": [
+        {"ref": "GF-01", "fr": "Loyer de l'atelier", "en": "Workshop rent", "unit": "mois", "price": 2480.0},
+        {"ref": "GF-02", "fr": "Loyer de la boutique", "en": "Shop rent", "unit": "mois", "price": 2150.0},
+        {"ref": "GF-03", "fr": "Assurance multirisque", "en": "Business insurance", "unit": "mois", "price": 412.0},
+        {"ref": "GF-04", "fr": "Expert comptable", "en": "Accountant", "unit": "mois", "price": 540.0},
+        {"ref": "GF-05", "fr": "Logiciels et abonnements", "en": "Software and subscriptions", "unit": "mois", "price": 168.0},
+    ],
+}
+
+# Nomenclature : ce qu'il faut pour fabriquer une unite vendable.
+BILLS_OF_MATERIALS = [
+    {"ref": "PF-01", "fr": "Sachet 250 g", "en": "250 g bag", "sold": "BTQ",
+     "lines": [
+         {"ref": "MP-03", "qty": 0.25 / 0.84, "fr": "Café vert, rendement 84 %", "en": "Green coffee, 84 % yield"},
+         {"ref": "EM-01", "qty": 1, "fr": "Sachet avec valve", "en": "Bag with valve"},
+         {"ref": "EM-03", "qty": 1, "fr": "Étiquette", "en": "Label"},
+         {"ref": "SV-04", "qty": 0.035, "fr": "Main d'oeuvre", "en": "Labour"},
+         {"ref": "SV-05", "qty": 0.25, "fr": "Énergie", "en": "Energy"},
+     ], "price": 6.98},
+    {"ref": "PF-02", "fr": "Sac 1 kg, professionnels", "en": "1 kg bag, trade", "sold": "GRO",
+     "lines": [
+         {"ref": "MP-01", "qty": 1 / 0.84, "fr": "Café vert, rendement 84 %", "en": "Green coffee, 84 % yield"},
+         {"ref": "EM-02", "qty": 1, "fr": "Sac 1 kg", "en": "1 kg bag"},
+         {"ref": "EM-03", "qty": 1, "fr": "Étiquette", "en": "Label"},
+         {"ref": "SV-04", "qty": 0.055, "fr": "Main d'oeuvre", "en": "Labour"},
+         {"ref": "SV-05", "qty": 1, "fr": "Énergie", "en": "Energy"},
+     ], "price": 16.75},
+    {"ref": "PF-03", "fr": "Coffret découverte, trois sachets", "en": "Discovery gift box, three bags", "sold": "WEB",
+     "lines": [
+         {"ref": "MP-02", "qty": 0.75 / 0.84, "fr": "Café vert, rendement 84 %", "en": "Green coffee, 84 % yield"},
+         {"ref": "EM-01", "qty": 3, "fr": "Sachets avec valve", "en": "Bags with valve"},
+         {"ref": "EM-03", "qty": 3, "fr": "Étiquettes", "en": "Labels"},
+         {"ref": "EM-04", "qty": 1, "fr": "Coffret carton", "en": "Gift box"},
+         {"ref": "SV-01", "qty": 1, "fr": "Assemblage sous-traité", "en": "Subcontracted assembly"},
+         {"ref": "SV-04", "qty": 0.08, "fr": "Main d'oeuvre", "en": "Labour"},
+         {"ref": "SV-05", "qty": 0.75, "fr": "Énergie", "en": "Energy"},
+     ], "price": 34.50},
+]
+
+# ----------------------------------------------------------------- campagnes
+CAMPAIGNS = [
+    {"ref": "CP-01", "fr": "Lancement du coffret découverte", "en": "Discovery box launch",
+     "channel_fr": "Reseaux sociaux", "channel_en": "Social media",
+     "from": "2026-03-02", "to": "2026-04-15", "budget": 3200.0, "orders": 214, "revenue": 6890.0},
+    {"ref": "CP-02", "fr": "Référencement du site", "en": "Search advertising",
+     "channel_fr": "Recherche payante", "channel_en": "Paid search",
+     "from": "2026-01-15", "to": "2026-09-30", "budget": 5400.0, "orders": 468, "revenue": 12740.0},
+    {"ref": "CP-03", "fr": "Dégustation en boutique", "en": "In store tasting",
+     "channel_fr": "Événement", "channel_en": "Event",
+     "from": "2026-05-16", "to": "2026-05-17", "budget": 780.0, "orders": 96, "revenue": 1410.0},
+    {"ref": "CP-04", "fr": "Prospection des cafés de quartier", "en": "Neighbourhood cafe prospecting",
+     "channel_fr": "Terrain", "channel_en": "Field",
+     "from": "2026-06-01", "to": "2026-07-31", "budget": 1950.0, "orders": 11, "revenue": 18600.0},
+    {"ref": "CP-05", "fr": "Partenariat avec un torréfacteur voisin", "en": "Partnership with a nearby roaster",
+     "channel_fr": "Partenariat", "channel_en": "Partnership",
+     "from": "2026-09-01", "to": "2026-12-31", "budget": 1400.0, "orders": 24, "revenue": 980.0},
+]
 
 # --------------------------------------------------------------------------- monthly
 
@@ -332,20 +439,20 @@ def buy_green(day: date) -> None:
     global bill_no
     bill_no += 1
     bill = f"FR-2026-{bill_no:04d}"
-    terms = SUPPLIERS["Belco, cafe vert"]
-    e_ac = B.post(day, "AC", f"Cafe vert {fr}, {kg} kg a {price:.2f} EUR, lot {ref}",
+    terms = SUPPLIERS["Belco, café vert"]
+    e_ac = B.post(day, "AC", f"Café vert {fr}, {kg} kg à {price:.2f} EUR, lot {ref}",
                   f"Green coffee {en}, {kg} kg at {price:.2f} EUR, lot {ref}",
-                  [("601000", ht, 0, "TOR", f"Cafe vert {fr}, lot {ref}"),
-                   ("445660", vat, 0, None, "TVA deductible 5,5 %"),
+                  [("601000", ht, 0, "TOR", f"Café vert {fr}, lot {ref}"),
+                   ("445660", vat, 0, None, "TVA déductible 5,5 %"),
                    ("401000", 0, r2(ht + vat), None, "Fournisseur Belco")], piece=ref)
-    bills.append({"ref": bill, "entry": e_ac["number"], "supplier": "Belco, cafe vert",
-                     "what_fr": f"Cafe vert {fr}, {kg} kg", "what_en": f"Green coffee {en}, {kg} kg",
+    bills.append({"ref": bill, "entry": e_ac["number"], "supplier": "Belco, café vert",
+                     "what_fr": f"Café vert {fr}, {kg} kg", "what_en": f"Green coffee {en}, {kg} kg",
                      "date": day.isoformat(), "due": due_date(day, terms).isoformat(),
                      "terms": terms, "ht": ht, "vat": vat, "amount": r2(ht + vat), "settled": False})
-    B.post(day, "ST", f"Entree en stock du lot {ref}, {kg} kg",
+    B.post(day, "ST", f"Entrée en stock du lot {ref}, {kg} kg",
            f"Lot {ref} into inventory, {kg} kg",
-           [("310000", ht, 0, None, f"Stock de cafe vert, lot {ref}"),
-            ("603100", 0, ht, "TOR", "Variation des stocks de cafe vert")], piece=ref)
+           [("310000", ht, 0, None, f"Stock de café vert, lot {ref}"),
+            ("603100", 0, ht, "TOR", "Variation des stocks de café vert")], piece=ref)
     state["green_kg"] += kg
     state["green_val"] += ht
     state["supplier"] += ht + vat
@@ -361,15 +468,15 @@ def buy_packaging(day: date) -> None:
     bill_no += 1
     bill = f"FR-2026-{bill_no:04d}"
     terms = SUPPLIERS["Packstore, emballages"]
-    e_ac = B.post(day, "AC", "Sachets, valves et etiquettes", "Bags, valves and labels",
+    e_ac = B.post(day, "AC", "Sachets, valves et étiquettes", "Bags, valves and labels",
                   [("602100", ht, 0, "TOR", "Emballages et fournitures"),
-                   ("445660", vat, 0, None, "TVA deductible 20 %"),
+                   ("445660", vat, 0, None, "TVA déductible 20 %"),
                    ("401000", 0, r2(ht + vat), None, "Fournisseur Packstore")], piece=bill)
     bills.append({"ref": bill, "entry": e_ac["number"], "supplier": "Packstore, emballages",
-                     "what_fr": "Sachets, valves et etiquettes", "what_en": "Bags, valves and labels",
+                     "what_fr": "Sachets, valves et étiquettes", "what_en": "Bags, valves and labels",
                      "date": day.isoformat(), "due": due_date(day, terms).isoformat(),
                      "terms": terms, "ht": ht, "vat": vat, "amount": r2(ht + vat), "settled": False})
-    B.post(day, "ST", "Entree en stock des emballages", "Packaging into inventory",
+    B.post(day, "ST", "Entrée en stock des emballages", "Packaging into inventory",
            [("320000", ht, 0, None, "Stock d'emballages"),
             ("603200", 0, ht, "TOR", "Variation des stocks d'emballages")])
     state["pack_val"] += ht
@@ -417,18 +524,18 @@ def roast(day: date, target_kg: float) -> None:
     var_round = r2(variance - var_qty - var_price)
 
     ref = f"TOR-{batch_no:03d}"
-    B.post(day, "ST", f"Sortie de cafe vert, brassin {ref}, {green_kg:.0f} kg",
+    B.post(day, "ST", f"Sortie de café vert, brassin {ref}, {green_kg:.0f} kg",
            f"Green coffee issued, batch {ref}, {green_kg:.0f} kg",
-           [("603100", green_cost, 0, "TOR", "Consommation de cafe vert"),
-            ("310000", 0, green_cost, None, "Stock de cafe vert")], piece=ref)
+           [("603100", green_cost, 0, "TOR", "Consommation de café vert"),
+            ("310000", 0, green_cost, None, "Stock de café vert")], piece=ref)
     B.post(day, "ST", f"Sortie d'emballages, brassin {ref}",
            f"Packaging issued, batch {ref}",
            [("603200", pack_cost, 0, "TOR", "Consommation d'emballages"),
             ("320000", 0, pack_cost, None, "Stock d'emballages")], piece=ref)
     B.post(day, "ST",
-           f"Production du brassin {ref}, {roasted_kg:.1f} kg au cout standard de {STD_COST:.2f} EUR",
+           f"Production du brassin {ref}, {roasted_kg:.1f} kg au coût standard de {STD_COST:.2f} EUR",
            f"Batch {ref} produced, {roasted_kg:.1f} kg at the standard cost of {STD_COST:.2f} EUR",
-           [("355000", standard_value, 0, None, f"Stock de cafe torrefie, brassin {ref}"),
+           [("355000", standard_value, 0, None, f"Stock de café torréfié, brassin {ref}"),
             ("713500", 0, standard_value, "TOR", "Production stockee")], piece=ref)
 
     state["green_kg"] = r2(state["green_kg"] - green_kg)
@@ -467,11 +574,11 @@ def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
         total = r2(ht + vat + extra_ht + extra_vat)
         state["till"] = r2(state.get("till", 1_450.0) + total)
         lines = [("530000", total, 0, None, "Encaissements de la journee"),
-                 ("701000", 0, ht, "BTQ", f"{kg:.1f} kg de cafe torrefie"),
-                 ("445710", 0, vat, None, "TVA collectee 5,5 %")]
+                 ("701000", 0, ht, "BTQ", f"{kg:.1f} kg de café torréfié"),
+                 ("445710", 0, vat, None, "TVA collectée 5,5 %")]
         if extra_ht:
-            lines += [("706000", 0, extra_ht, "BTQ", "Bar et degustations"),
-                      ("445710", 0, extra_vat, None, "TVA collectee 10 %")]
+            lines += [("706000", 0, extra_ht, "BTQ", "Bar et dégustations"),
+                      ("445710", 0, extra_vat, None, "TVA collectée 10 %")]
         B.post(day, "CA", f"{lines_fr}, {day.strftime('%d/%m')}",
                f"{lines_en}, {day.strftime('%d/%m')}", lines)
         state["vat_out"] += vat + extra_vat
@@ -486,10 +593,10 @@ def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
         B.post(day, "VE", f"Commande en ligne {kg:.2f} kg, {day.strftime('%d/%m')}",
                f"Online order {kg:.2f} kg, {day.strftime('%d/%m')}",
                [("512000", total, 0, None, "Encaissement Stripe"),
-                ("701000", 0, ht, "WEB", f"{kg:.2f} kg de cafe torrefie"),
+                ("701000", 0, ht, "WEB", f"{kg:.2f} kg de café torréfié"),
                 ("708500", 0, ship_ht, "WEB", "Port facture"),
-                ("445710", 0, vat, None, "TVA collectee 5,5 %"),
-                ("445710", 0, ship_vat, None, "TVA collectee 20 %")])
+                ("445710", 0, vat, None, "TVA collectée 5,5 %"),
+                ("445710", 0, ship_vat, None, "TVA collectée 20 %")])
         state["vat_out"] += vat + ship_vat
     else:
         global invoice_no
@@ -508,12 +615,12 @@ def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
         e = B.post(day, "VE", f"Facture {ref}, {name}, {kg:.0f} kg",
                    f"Invoice {ref}, {name}, {kg:.0f} kg",
                    [("411000", total, 0, None, f"Client {name}, facture {ref}"),
-                    ("701000", 0, ht, "GRO", f"{kg:.0f} kg de cafe torrefie"),
-                    ("445710", 0, vat, None, "TVA collectee 5,5 %")],
+                    ("701000", 0, ht, "GRO", f"{kg:.0f} kg de café torréfié"),
+                    ("445710", 0, vat, None, "TVA collectée 5,5 %")],
                    piece=ref)
         state["customer"] += total
         state["vat_out"] += vat
-        slow = name in ("Cantine Numerique", "Bureau Partage Confluence")
+        slow = name in ("Cantine Numérique", "Bureau Partage Confluence")
         # choisi sans toucher au generateur aleatoire : un tirage de plus ici decalerait
         # toute la simulation en aval (achats, brassins, tresorerie)
         blend, blend_en, _ = ORIGINS[invoice_no % len(ORIGINS)]
@@ -527,10 +634,10 @@ def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
                            "date": day.isoformat(), "due": due.isoformat(), "amount": total,
                            "terms": terms, "slow": slow, "settled": False})
 
-    B.post(day, "ST", f"Sortie de stock au cout standard, {lines_fr.lower()}",
+    B.post(day, "ST", f"Sortie de stock au coût standard, {lines_fr.lower()}",
            f"Inventory issued at standard cost, {lines_en.lower()}",
            [("713500", cost, 0, centre, "Destockage de produits finis"),
-            ("355000", 0, cost, None, "Stock de cafe torrefie")])
+            ("355000", 0, cost, None, "Stock de café torréfié")])
     state["fg_kg"] = r2(state["fg_kg"] - kg)
     state["fg_val"] = r2(state["fg_val"] - cost)
 
@@ -541,15 +648,15 @@ def settle_customers(day: date) -> None:
             continue
         # Cantine Numerique ne regle plus rien depuis le printemps : c'est ce client
         # qui rend l'exercice fragile, et c'est lui qu'on deprecie a la cloture
-        if item["customer"] == "Cantine Numerique" and item["date"] >= "2026-05-01":
+        if item["customer"] == "Cantine Numérique" and item["date"] >= "2026-05-01":
             continue
         due = date.fromisoformat(item["due"])
         if item.get("slow"):
             due = due + timedelta(days=random.choice([28, 35, 46, 62]))
         if (due - timedelta(days=4)) <= day and random.random() < 0.9:
-            B.post(day, "BQ", f"Reglement facture {item['invoice']}, {item['customer']}",
+            B.post(day, "BQ", f"Règlement facture {item['invoice']}, {item['customer']}",
                    f"Payment of invoice {item['invoice']}, {item['customer']}",
-                   [("512000", item["amount"], 0, None, "Virement recu"),
+                   [("512000", item["amount"], 0, None, "Virement reçu"),
                     ("411000", 0, item["amount"], None,
                      f"Client {item['customer']}, facture {item['invoice']}")],
                    piece=item["invoice"])
@@ -562,7 +669,7 @@ def bank_the_till(day: date) -> None:
     amount = r2(state["till"] - 400.0)
     if amount < 200:
         return
-    B.post(day, "CA", "Remise en banque des especes", "Cash banked",
+    B.post(day, "CA", "Remise en banque des espèces", "Cash banked",
            [("512000", amount, 0, None, "Remise de la semaine"),
             ("530000", 0, amount, None, "Caisse de la boutique")])
     state["till"] = r2(state["till"] - amount)
@@ -570,9 +677,9 @@ def bank_the_till(day: date) -> None:
 
 def settle_opening(day: date, amount: float) -> None:
     """The customers who owed money on 31 December pay during January."""
-    B.post(day, "BQ", "Reglement de creances de l'exercice precedent",
+    B.post(day, "BQ", "Règlement de créances de l'exercice précédent",
            "Payment of receivables carried forward",
-           [("512000", amount, 0, None, "Virements recus"),
+           [("512000", amount, 0, None, "Virements reçus"),
             ("411000", 0, amount, None, "Clients, factures 2025")])
     state["customer"] = r2(state["customer"] - amount)
 
@@ -596,10 +703,10 @@ def pay_suppliers(day: date) -> None:
     total = r2(amount + opening)
     if total < 200:
         return
-    label = f"Reglement de {len(due_now)} factures fournisseurs" if due_now else "Reglement fournisseurs"
+    label = f"Règlement de {len(due_now)} factures fournisseurs" if due_now else "Règlement fournisseurs"
     B.post(day, "BQ", label, f"Payment of {len(due_now)} supplier invoices",
            [("401000", total, 0, None, "Fournisseurs"),
-            ("512000", 0, total, None, "Virements emis")])
+            ("512000", 0, total, None, "Virements émis")])
     for b in due_now:
         b["settled"] = True
         b["paid_on"] = day.isoformat()
@@ -614,8 +721,8 @@ def monthly_costs(day: date, m: int) -> None:
     B.post(last, "BQ", f"Loyers du mois {m:02d}", f"Rent, month {m:02d}",
            [("613200", rent_shop, 0, "BTQ", "Loyer de la boutique"),
             ("613200", rent_works, 0, "TOR", "Loyer de l'atelier"),
-            ("445660", vat, 0, None, "TVA deductible 20 %"),
-            ("512000", 0, r2(rent_shop + rent_works + vat), None, "Prelevement du bailleur")])
+            ("445660", vat, 0, None, "TVA déductible 20 %"),
+            ("512000", 0, r2(rent_shop + rent_works + vat), None, "Prélèvement du bailleur")])
     state["vat_in"] += vat
 
     # payroll
@@ -624,18 +731,18 @@ def monthly_costs(day: date, m: int) -> None:
     employer = r2(total_gross * 0.42)
     net = r2(total_gross * 0.78)
     social = r2(total_gross - net + employer)
-    B.post(last, "PA", f"Paie du mois {m:02d}, 7 salaries", f"Payroll, month {m:02d}, 7 people",
+    B.post(last, "PA", f"Paie du mois {m:02d}, 7 salariés", f"Payroll, month {m:02d}, 7 people",
            [("641100", v, 0, c, f"Salaires bruts, {c}") for c, v in gross.items()] +
            [("645100", employer, 0, "ADM", "Charges patronales"),
-            ("421000", 0, net, None, "Net a payer"),
+            ("421000", 0, net, None, "Net à payer"),
             ("431000", 0, social, None, "Cotisations sociales")])
     B.post(last, "BQ", f"Virement des salaires nets, mois {m:02d}",
            f"Net wages paid, month {m:02d}",
-           [("421000", net, 0, None, "Net a payer"),
+           [("421000", net, 0, None, "Net à payer"),
             ("512000", 0, net, None, "Virements de paie")])
     if m % 3 == 0:
         due = r2(social * 3)
-        B.post(last, "BQ", "Reglement des charges sociales du trimestre",
+        B.post(last, "BQ", "Règlement des charges sociales du trimestre",
                "Quarterly social contributions paid",
                [("431000", due, 0, None, "Organismes sociaux"),
                 ("512000", 0, due, None, "Virement Urssaf")])
@@ -643,66 +750,128 @@ def monthly_costs(day: date, m: int) -> None:
     # energy, insurance, marketing, fees, misc
     energy = r2(random.uniform(1_560, 2_240))
     vat_e = r2(energy * VAT_STANDARD)
-    B.post(last, "BQ", f"Electricite et gaz, mois {m:02d}", f"Electricity and gas, month {m:02d}",
-           [("606100", r2(energy * 0.78), 0, "TOR", "Energie de l'atelier"),
-            ("606100", r2(energy - r2(energy * 0.78)), 0, "BTQ", "Energie de la boutique"),
-            ("445660", vat_e, 0, None, "TVA deductible 20 %"),
-            ("512000", 0, r2(energy + vat_e), None, "Prelevement Enedis")])
+    B.post(last, "BQ", f"Électricité et gaz, mois {m:02d}", f"Electricity and gas, month {m:02d}",
+           [("606100", r2(energy * 0.78), 0, "TOR", "Énergie de l'atelier"),
+            ("606100", r2(energy - r2(energy * 0.78)), 0, "BTQ", "Énergie de la boutique"),
+            ("445660", vat_e, 0, None, "TVA déductible 20 %"),
+            ("512000", 0, r2(energy + vat_e), None, "Prélèvement Enedis")])
     state["vat_in"] += vat_e
 
     ins = 412.0
     B.post(last, "BQ", "Assurance multirisque", "Business insurance",
            [("616000", ins, 0, "ADM", "Prime mensuelle"),
-            ("512000", 0, ins, None, "Prelevement assureur")])
+            ("512000", 0, ins, None, "Prélèvement assureur")])
 
     mkt = r2(random.uniform(1_100, 1_950))
     vat_m = r2(mkt * VAT_STANDARD)
     B.post(last, "BQ", f"Marketing et communication, mois {m:02d}",
            f"Marketing and communication, month {m:02d}",
            [("623100", mkt, 0, "MKT", "Campagnes et contenus"),
-            ("445660", vat_m, 0, None, "TVA deductible 20 %"),
-            ("512000", 0, r2(mkt + vat_m), None, "Prelevements divers")])
+            ("445660", vat_m, 0, None, "TVA déductible 20 %"),
+            ("512000", 0, r2(mkt + vat_m), None, "Prélèvements divers")])
     state["vat_in"] += vat_m
 
     fees = 540.0
     vat_f = r2(fees * VAT_STANDARD)
     B.post(last, "BQ", "Honoraires de l'expert comptable", "Accountant fees",
            [("622600", fees, 0, "ADM", "Honoraires mensuels"),
-            ("445660", vat_f, 0, None, "TVA deductible 20 %"),
+            ("445660", vat_f, 0, None, "TVA déductible 20 %"),
             ("512000", 0, r2(fees + vat_f), None, "Virement cabinet")])
     state["vat_in"] += vat_f
 
     ship = r2(random.uniform(1_250, 1_980))
     vat_s = r2(ship * VAT_STANDARD)
     B.post(last, "BQ", f"Transporteur, mois {m:02d}", f"Carrier, month {m:02d}",
-           [("624100", r2(ship * 0.62), 0, "WEB", "Expeditions en ligne"),
+           [("624100", r2(ship * 0.62), 0, "WEB", "Expéditions en ligne"),
             ("624100", r2(ship - r2(ship * 0.62)), 0, "GRO", "Livraisons professionnelles"),
-            ("445660", vat_s, 0, None, "TVA deductible 20 %"),
-            ("512000", 0, r2(ship + vat_s), None, "Prelevement transporteur")])
+            ("445660", vat_s, 0, None, "TVA déductible 20 %"),
+            ("512000", 0, r2(ship + vat_s), None, "Prélèvement transporteur")])
     state["vat_in"] += vat_s
 
     misc = r2(random.uniform(180, 520))
     vat_x = r2(misc * VAT_STANDARD)
-    B.post(last, "BQ", "Petit equipement et entretien", "Small equipment and maintenance",
+    B.post(last, "BQ", "Petit équipement et entretien", "Small equipment and maintenance",
            [("606300", misc, 0, "TOR", "Filtres, outillage, entretien"),
-            ("445660", vat_x, 0, None, "TVA deductible 20 %"),
+            ("445660", vat_x, 0, None, "TVA déductible 20 %"),
             ("512000", 0, r2(misc + vat_x), None, "Achats divers")])
     state["vat_in"] += vat_x
+
+    # sous-traitance de l'assemblage des coffrets, facturee au coffret
+    boxes = int(38 + 26 * SEASON[m])
+    sub = r2(boxes * 1.20)
+    vat_sub = r2(sub * VAT_STANDARD)
+    B.post(last, "AC", f"Assemblage de {boxes} coffrets, Atelier Prisme",
+           f"Assembly of {boxes} gift boxes, Atelier Prisme",
+           [("611000", sub, 0, "TOR", "Sous-traitance d'assemblage"),
+            ("445660", vat_sub, 0, None, "TVA déductible 20 %"),
+            ("401000", 0, r2(sub + vat_sub), None, "Atelier Prisme")])
+    state["supplier"] += sub + vat_sub
+    state["vat_in"] += vat_sub
+
+    # abonnements : caisse, comptabilite en ligne, site marchand
+    subs = 168.0
+    vat_subs = r2(subs * VAT_STANDARD)
+    B.post(last, "BQ", "Logiciels et abonnements", "Software and subscriptions",
+           [("618000", subs, 0, "ADM", "Caisse, gestion, site"),
+            ("445660", vat_subs, 0, None, "TVA déductible 20 %"),
+            ("512000", 0, r2(subs + vat_subs), None, "Prélèvements")])
+    state["vat_in"] += vat_subs
+
+    if m in (2, 5, 9):
+        tools = r2(random.uniform(340, 890))
+        vat_t = r2(tools * VAT_STANDARD)
+        B.post(last, "AC", "Outillage de l'atelier", "Workshop tooling",
+               [("605000", tools, 0, "TOR", "Balances, pelles, bacs de refroidissement"),
+                ("445660", vat_t, 0, None, "TVA déductible 20 %"),
+                ("401000", 0, r2(tools + vat_t), None, "Fournisseur matériel")])
+        state["supplier"] += tools + vat_t
+        state["vat_in"] += vat_t
+
+    if m in (3, 9):
+        wear = r2(random.uniform(210, 460))
+        vat_w = r2(wear * VAT_STANDARD)
+        B.post(last, "AC", "Tabliers, gants et hygiène", "Aprons, gloves and hygiene",
+               [("606800", wear, 0, "TOR", "Vêtements de travail"),
+                ("445660", vat_w, 0, None, "TVA déductible 20 %"),
+                ("401000", 0, r2(wear + vat_w), None, "Fournisseur équipement")])
+        state["supplier"] += wear + vat_w
+        state["vat_in"] += vat_w
+
+    if m in (4, 6):
+        trip = r2(random.uniform(480, 940))
+        vat_tr = r2(trip * VAT_STANDARD)
+        B.post(last, "BQ", "Salon professionnel et visite producteur",
+               "Trade show and producer visit",
+               [("625100", trip, 0, "ADM", "Déplacements et missions"),
+                ("445660", vat_tr, 0, None, "TVA déductible 20 %"),
+                ("512000", 0, r2(trip + vat_tr), None, "Carte bancaire")])
+        state["vat_in"] += vat_tr
+
+    if m == 7:
+        study = 1_650.0
+        vat_st = r2(study * VAT_STANDARD)
+        B.post(last, "AC", "Étude de positionnement tarifaire",
+               "Pricing study",
+               [("604000", study, 0, "MKT", "Prestation d'étude"),
+                ("445660", vat_st, 0, None, "TVA déductible 20 %"),
+                ("401000", 0, r2(study + vat_st), None, "Cabinet d'études")])
+        state["supplier"] += study + vat_st
+        state["vat_in"] += vat_st
 
     bank = 68.0
     B.post(last, "BQ", "Frais bancaires", "Bank charges",
            [("627000", bank, 0, "ADM", "Commissions du mois"),
-            ("512000", 0, bank, None, "Frais preleves")])
+            ("512000", 0, bank, None, "Frais prélevés")])
 
     # loan: 118 400 EUR left at the start, 1.9 % a year
     rate = 0.019 / 12
     interest = r2(state.get("loan", 118_400.0) * rate)
     principal = 1_640.0
     state["loan"] = r2(state.get("loan", 118_400.0) - principal)
-    B.post(last, "BQ", "Echeance de l'emprunt torrefacteur", "Loan instalment, roaster",
+    B.post(last, "BQ", "Échéance de l'emprunt torréfacteur", "Loan instalment, roaster",
            [("164000", principal, 0, None, "Capital rembourse"),
-            ("661100", interest, 0, "ADM", "Interets"),
-            ("512000", 0, r2(principal + interest), None, "Prelevement de la banque")])
+            ("661100", interest, 0, "ADM", "Intérêts"),
+            ("512000", 0, r2(principal + interest), None, "Prélèvement de la banque")])
 
     # depreciation
     d1, d2, d3, d4 = r2(146_000 / 120), r2(58_400 / 108), r2(11_900 / 48), r2(6_800 / 36)
@@ -710,30 +879,30 @@ def monthly_costs(day: date, m: int) -> None:
     B.post(last, "OD", f"Dotation aux amortissements, mois {m:02d}",
            f"Depreciation charge, month {m:02d}",
            [("681100", dep, 0, "TOR", "Dotation du mois"),
-            ("281540", 0, d1, None, "Torrefacteur"),
+            ("281540", 0, d1, None, "Torréfacteur"),
             ("281350", 0, d2, None, "Agencement"),
-            ("281830", 0, d3, None, "Materiel de bureau"),
+            ("281830", 0, d3, None, "Matériel de bureau"),
             ("280500", 0, d4, None, "Logiciel")])
 
     # VAT settlement for the month
     out_, in_ = r2(state["vat_out"]), r2(state["vat_in"])
     due = r2(out_ - in_)
     if due > 0:
-        B.post(last, "OD", f"TVA du mois {m:02d}, declaration CA3",
+        B.post(last, "OD", f"TVA du mois {m:02d}, déclaration CA3",
                f"VAT return, month {m:02d}",
-               [("445710", out_, 0, None, "TVA collectee"),
-                ("445660", 0, in_, None, "TVA deductible"),
-                ("445510", 0, due, None, "TVA a decaisser")])
+               [("445710", out_, 0, None, "TVA collectée"),
+                ("445660", 0, in_, None, "TVA déductible"),
+                ("445510", 0, due, None, "TVA à décaisser")])
         pay_day = min(END, date(last.year, last.month, 20) + timedelta(days=30))
         B.post(pay_day, "BQ", f"Paiement de la TVA du mois {m:02d}",
                f"VAT paid, month {m:02d}",
-               [("445510", due, 0, None, "TVA a decaisser"),
+               [("445510", due, 0, None, "TVA à décaisser"),
                 ("512000", 0, due, None, "Teleréglement DGFIP")])
     state["vat_out"], state["vat_in"] = 0.0, 0.0
 
     if m == 3:
         cfe = 1_890.0
-        B.post(last, "BQ", "Cotisation fonciere des entreprises", "Local business tax",
+        B.post(last, "BQ", "Cotisation foncière des entreprises", "Local business tax",
                [("635100", cfe, 0, "ADM", "CFE annuelle"),
                 ("512000", 0, cfe, None, "Virement DGFIP")])
 
@@ -798,53 +967,53 @@ for m in range(1, 10):
 ACTIVITIES = [
     {
         "id": "ACT-01", "status": "done", "category": "maintenance",
-        "fr": "Fuite sur la tuyauterie du torrefacteur",
+        "fr": "Fuite sur la tuyauterie du torréfacteur",
         "en": "Leak on the roaster pipework",
         "opened": "2026-09-03",
         "updates": [
-            {"date": "2026-09-03", "fr": "Fuite constatee sous la conduite de vapeur au demarrage du brassin du matin. Production poursuivie avec un seau.",
+            {"date": "2026-09-03", "fr": "Fuite constatée sous la conduite de vapeur au démarrage du brassin du matin. Production poursuivie avec un seau.",
              "en": "Leak found under the steam line when starting the morning batch. Kept roasting with a bucket underneath.", "entry": None},
             {"date": "2026-09-03", "fr": "Rendez-vous pris avec un plombier pour le 5 septembre.",
              "en": "Appointment booked with a plumber for 5 September.", "entry": None},
-            {"date": "2026-09-05", "fr": "Visite faite. Devis annonce sous 24 heures.",
+            {"date": "2026-09-05", "fr": "Visite faite. Devis annoncé sous 24 heures.",
              "en": "Visit done. Quote promised within 24 hours.", "entry": None},
-            {"date": "2026-09-06", "fr": "Devis recu, 640 EUR HT. Aucune ecriture : un devis n'engage rien tant qu'il n'est pas accepte et facture.",
+            {"date": "2026-09-06", "fr": "Devis reçu, 640 EUR HT. Aucune écriture : un devis n'engage rien tant qu'il n'est pas accepté et facturé.",
              "en": "Quote received, 640 EUR net. No entry: a quote commits nothing until it is accepted and invoiced.", "entry": None},
-            {"date": "2026-09-08", "fr": "Le plombier annule, il ne prend plus de chantier avant octobre. Retour a la case depart.",
+            {"date": "2026-09-08", "fr": "Le plombier annule, il ne prend plus de chantier avant octobre. Retour à la case départ.",
              "en": "The plumber cancels, no new jobs before October. Back to square one.", "entry": None},
-            {"date": "2026-09-10", "fr": "Second prestataire trouve par la voisine torrefactrice, intervention calee au 14.",
+            {"date": "2026-09-10", "fr": "Second prestataire trouvé par la voisine torréfactrice, intervention calée au 14.",
              "en": "Second contractor found through the roaster next door, work booked for the 14th.", "entry": None},
-            {"date": "2026-09-14", "fr": "Reparation faite, facture 480 EUR HT. La voila, l'ecriture.",
+            {"date": "2026-09-14", "fr": "Réparation faite, facture 480 EUR HT. La voilà, l'écriture.",
              "en": "Repair done, invoice 480 EUR net. There is the entry.", "entry": "AC"},
-            {"date": "2026-09-30", "fr": "Facture reglee par virement.",
+            {"date": "2026-09-30", "fr": "Facture réglée par virement.",
              "en": "Invoice paid by transfer.", "entry": "BQ"},
         ],
     },
     {
         "id": "ACT-02", "status": "waiting", "category": "client",
-        "fr": "Cantine Numerique ne regle plus ses factures",
+        "fr": "Cantine Numérique ne règle plus ses factures",
         "en": "Cantine Numerique has stopped paying",
         "opened": "2026-06-30",
         "updates": [
-            {"date": "2026-06-30", "fr": "Premiere facture echue non reglee. Relance telephonique, promesse de virement.",
+            {"date": "2026-06-30", "fr": "Première facture échue non réglée. Relance téléphonique, promesse de virement.",
              "en": "First invoice past due. Called them, transfer promised.", "entry": None},
-            {"date": "2026-07-31", "fr": "Deuxieme echeance passee. Relance ecrite envoyee.",
+            {"date": "2026-07-31", "fr": "Deuxième échéance passée. Relance écrite envoyée.",
              "en": "Second due date passed. Written reminder sent.", "entry": None},
             {"date": "2026-08-20", "fr": "Contact impossible depuis trois semaines. Livraisons suspendues.",
              "en": "No contact for three weeks. Deliveries suspended.", "entry": None},
-            {"date": "2026-09-30", "fr": "Creance passee en clients douteux et depreciee a la cloture. Cette fois, cela touche le resultat.",
+            {"date": "2026-09-30", "fr": "Créance passée en clients douteux et dépréciée à la clôture. Cette fois, cela touche le résultat.",
              "en": "Receivable moved to doubtful customers and written down at closing. This time it hits the result.", "entry": "OD"},
         ],
     },
     {
         "id": "ACT-03", "status": "planned", "category": "bail",
-        "fr": "Renegociation du bail de l'atelier",
+        "fr": "Renégociation du bail de l'atelier",
         "en": "Workshop lease renegotiation",
         "opened": "2026-09-12",
         "updates": [
-            {"date": "2026-09-12", "fr": "Le bail arrive a echeance en mars. Objectif : passer de 2 480 a 2 100 EUR par mois.",
+            {"date": "2026-09-12", "fr": "Le bail arrive à échéance en mars. Objectif : passer de 2 480 à 2 100 EUR par mois.",
              "en": "The lease ends in March. Target: from 2 480 down to 2 100 EUR a month.", "entry": None},
-            {"date": "2026-09-22", "fr": "Courrier envoye au bailleur, reponse attendue sous un mois.",
+            {"date": "2026-09-22", "fr": "Courrier envoyé au bailleur, réponse attendue sous un mois.",
              "en": "Letter sent to the landlord, answer expected within a month.", "entry": None},
         ],
     },
@@ -854,35 +1023,35 @@ ACTIVITIES = [
         "en": "The shop grinder is running hot",
         "opened": "2026-09-24",
         "updates": [
-            {"date": "2026-09-24", "fr": "Odeur de brule apres vingt minutes d'affilee. Meules a changer, probablement.",
+            {"date": "2026-09-24", "fr": "Odeur de brûlé après vingt minutes d'affilée. Meules à changer, probablement.",
              "en": "Burning smell after twenty minutes of use. Burrs probably need replacing.", "entry": None},
-            {"date": "2026-09-26", "fr": "Devis demande a deux fournisseurs, rien recu pour l'instant.",
+            {"date": "2026-09-26", "fr": "Devis demandé à deux fournisseurs, rien reçu pour l'instant.",
              "en": "Quotes requested from two suppliers, nothing received yet.", "entry": None},
         ],
     },
     {
         "id": "ACT-05", "status": "done", "category": "equipe",
-        "fr": "Recrutement d'un apprenti torrefacteur",
+        "fr": "Recrutement d'un apprenti torréfacteur",
         "en": "Hiring an apprentice roaster",
         "opened": "2026-04-02",
         "updates": [
-            {"date": "2026-04-02", "fr": "Annonce deposee au CFA. Objectif : septembre.",
+            {"date": "2026-04-02", "fr": "Annonce déposée au CFA. Objectif : septembre.",
              "en": "Advert posted with the training centre. Target: September.", "entry": None},
-            {"date": "2026-06-18", "fr": "Trois candidats recus, un retenu.",
+            {"date": "2026-06-18", "fr": "Trois candidats reçus, un retenu.",
              "en": "Three candidates seen, one chosen.", "entry": None},
-            {"date": "2026-09-01", "fr": "Arrivee dans l'equipe. Le cout apparait dans la paie du mois.",
+            {"date": "2026-09-01", "fr": "Arrivée dans l'équipe. Le coût apparaît dans la paie du mois.",
              "en": "Joined the team. The cost shows up in the month's payroll.", "entry": "PA"},
         ],
     },
     {
         "id": "ACT-06", "status": "cancelled", "category": "commercial",
-        "fr": "Marche de Noel de la place Bellecour",
+        "fr": "Marché de Noël de la place Bellecour",
         "en": "Christmas market stall",
         "opened": "2026-08-20",
         "updates": [
-            {"date": "2026-08-20", "fr": "Dossier de candidature depose pour un chalet en decembre.",
+            {"date": "2026-08-20", "fr": "Dossier de candidature déposé pour un chalet en décembre.",
              "en": "Application filed for a chalet in December.", "entry": None},
-            {"date": "2026-09-18", "fr": "Candidature refusee, faute de place. Aucune consequence comptable : rien n'avait ete engage.",
+            {"date": "2026-09-18", "fr": "Candidature refusée, faute de place. Aucune conséquence comptable : rien n'avait été engagé.",
              "en": "Application refused, no space left. No accounting consequence: nothing had been committed.", "entry": None},
         ],
     },
@@ -906,14 +1075,14 @@ for it in open_items:
 
 if doubtful:
     # on transfere les creances concernees en clients douteux, puis on les deprecie
-    B.post(END, "OD", "Transfert en clients douteux a la cloture",
+    B.post(END, "OD", "Transfert en clients douteux à la clôture",
            "Doubtful receivables reclassified at closing",
            [("416000", r2(sum(d["amount"] for d in doubtful)), 0, None, "Clients douteux")] +
            [("411000", 0, r2(sum(d["amount"] for d in doubtful)), None, "Clients")])
-    B.post(END, "OD", f"Depreciation des creances douteuses, {len(doubtful)} factures",
+    B.post(END, "OD", f"Dépréciation des créances douteuses, {len(doubtful)} factures",
            f"Allowance for doubtful debts, {len(doubtful)} invoices",
            [("681740", _prov_total, 0, "ADM", "Dotation de l'exercice"),
-            ("491000", 0, _prov_total, None, "Depreciation des comptes clients")])
+            ("491000", 0, _prov_total, None, "Dépréciation des comptes clients")])
 
 # --------------------------------------------------------------------------- statements
 
@@ -942,10 +1111,12 @@ def build() -> dict:
     sales = r2(-group(("701", "706", "708")))
     stored = r2(-bal("713500"))
     op_income = r2(sales + stored)
-    purchases = group(("601", "602"))
+    # tout compte de classe 6 doit tomber dans un poste, sinon le bilan ne s'equilibre plus
+    purchases = group(("601", "602", "604", "605"))
     stock_change = group(("603",))
     other_purchases = group(("606",))
-    external = group(("613", "615", "616", "622", "623", "624", "626", "627"))
+    external = group(("611", "613", "615", "616", "618", "622", "623", "624",
+                      "625", "626", "627", "628"))
     taxes = group(("635",))
     wages = group(("641",))
     social = group(("645",))
@@ -1058,10 +1229,11 @@ def build() -> dict:
         return r2(group(prefixes) / sales * 100) if sales else 0.0
 
     per100 = [
-        {"key": "materials", "pct": part(("601", "602", "603"))},
+        {"key": "materials", "pct": part(("601", "602", "603", "604", "605", "611"))},
         {"key": "people", "pct": part(("641", "645"))},
         {"key": "place", "pct": part(("613", "606"))},
-        {"key": "services", "pct": part(("615", "616", "622", "623", "624", "626", "627", "635"))},
+        {"key": "services", "pct": part(("615", "616", "618", "622", "623", "624",
+                                        "625", "626", "627", "628", "635"))},
         {"key": "wear", "pct": part(("6811",))},
         {"key": "unpaid", "pct": part(("6817",))},
         {"key": "bank", "pct": part(("661",))},
@@ -1080,6 +1252,84 @@ def build() -> dict:
     paid_bills = [b for b in bills if b.get("paid_on")]
     dpo = (round(sum((date.fromisoformat(b["paid_on"]) - date.fromisoformat(b["date"])).days
                      for b in paid_bills) / len(paid_bills), 1) if paid_bills else 0.0)
+
+    # ---------------------------------------------------------- cout de revient
+    # On recalcule chaque produit depuis sa nomenclature : c'est ce que l'entrepreneur
+    # doit pouvoir refaire seul avant de fixer un prix.
+    price_of = {}
+    for family in ("materials", "packaging", "services", "overheads"):
+        for item in PRICE_BOOK[family]:
+            price_of[item["ref"]] = item
+
+    products = []
+    for bom in BILLS_OF_MATERIALS:
+        lines = []
+        cost = 0.0
+        for l in bom["lines"]:
+            src = price_of[l["ref"]]
+            amount = r2(l["qty"] * src["price"])
+            cost = r2(cost + amount)
+            lines.append({**l, "qty": round(l["qty"], 4), "unit": src["unit"],
+                          "unit_price": src["price"], "amount": amount,
+                          "source_fr": src["fr"], "source_en": src["en"]})
+        margin = r2(bom["price"] - cost)
+        products.append({
+            "ref": bom["ref"], "fr": bom["fr"], "en": bom["en"], "sold": bom["sold"],
+            "lines": lines, "cost": cost, "price": bom["price"], "margin": margin,
+            "margin_pct": r2(margin / bom["price"] * 100) if bom["price"] else 0.0,
+            "coefficient": r2(bom["price"] / cost) if cost else 0.0,
+        })
+
+    # ---------------------------------------------------------- campagnes
+    spent_marketing = group(("623",))
+    campaigns = []
+    total_budget = sum(c["budget"] for c in CAMPAIGNS)
+    for c in CAMPAIGNS:
+        share = c["budget"] / total_budget if total_budget else 0
+        spent = r2(spent_marketing * share)
+        campaigns.append({
+            **c, "spent": spent,
+            "cost_per_order": r2(spent / c["orders"]) if c["orders"] else 0.0,
+            "return_per_euro": r2(c["revenue"] / spent) if spent else 0.0,
+            "margin": r2(c["revenue"] - spent),
+        })
+    campaigns.sort(key=lambda c: -c["return_per_euro"])
+
+    # ---------------------------------------------------------- echeancier
+    # Ce qui tombe apres la date de cloture : c'est la que se joue le rappel.
+    agenda = []
+    for it in open_items:
+        if it["settled"]:
+            continue
+        agenda.append({"date": it["due"], "kind": "client", "ref": it.get("invoice", it["entry"]),
+                       "fr": f"Encaissement attendu, {it['customer']}",
+                       "en": f"Payment expected, {it['customer']}",
+                       "amount": it["amount"]})
+    for b in bills:
+        if b["settled"]:
+            continue
+        agenda.append({"date": b["due"], "kind": "fournisseur", "ref": b["ref"],
+                       "fr": f"Règlement dû à {b['supplier']}",
+                       "en": f"Payment due to {b['supplier']}",
+                       "amount": -b["amount"]})
+    vat_due_amount = r2(-(bal("445510")))
+    agenda.append({"date": "2026-10-20", "kind": "fiscal", "ref": "CA3",
+                   "fr": "Déclaration et paiement de la TVA de septembre",
+                   "en": "September VAT return and payment", "amount": -vat_due_amount})
+    agenda.append({"date": "2026-10-31", "kind": "paie", "ref": "PAIE",
+                   "fr": "Paie du mois et virement des salaires",
+                   "en": "Monthly payroll and wage transfer", "amount": -r2(15_200 * 0.78)})
+    agenda.append({"date": "2026-10-15", "kind": "social", "ref": "URSSAF",
+                   "fr": "Cotisations sociales du troisième trimestre",
+                   "en": "Third quarter social contributions", "amount": -r2(-bal("431000"))})
+    for a in ACTIVITIES:
+        if a["status"] in ("open", "waiting", "planned"):
+            agenda.append({"date": a["updates"][-1]["date"], "kind": "suivi", "ref": a["id"],
+                           "fr": f"À relancer : {a['fr']}", "en": f"To follow up: {a['en']}",
+                           "amount": 0.0})
+    agenda.sort(key=lambda x: x["date"])
+    late = [x for x in agenda if x["date"] <= END.isoformat()]
+    soon = [x for x in agenda if END.isoformat() < x["date"] <= "2026-10-31"]
 
     # Test de resistance. Chaque client professionnel represente un encours ; si son
     # comportement de paiement devenait celui du client deja douteux, il faudrait le
@@ -1130,6 +1380,15 @@ def build() -> dict:
 
     return {
         "activities": activities,
+        "price_book": PRICE_BOOK,
+        "products": products,
+        "campaigns": campaigns,
+        "agenda": {
+            "all": agenda, "late": late, "soon": soon,
+            "late_amount": r2(sum(x["amount"] for x in late)),
+            "soon_amount": r2(sum(x["amount"] for x in soon)),
+            "closing": END.isoformat(),
+        },
         "per100": per100,
         "payables": {
             "open": open_bills, "total": r2(sum(b["amount"] for b in open_bills)),
@@ -1259,6 +1518,9 @@ print(f"DSO reel          {r['dso']:>12} jours sur {r['paid_count']} factures pa
 st = books["stress"]
 print(f"depreciation      {st['allowance_booked']:>12,.2f}  sur {st['doubtful_count']} factures")
 print(f"bascule apres     {st['tipping']:>12}  clients de plus")
+ag = books["agenda"]
+print(f"echeancier        {len(ag['all']):>12}  dont {len(ag['late'])} en retard, {len(ag['soon'])} sous 30 jours")
+print(f"produits calcules {len(books['products']):>12}  campagnes {len(books['campaigns'])}")
 pa = books["payables"]
 print(f"dettes ouvertes   {pa['total']:>12,.2f}  sur {pa['count']} factures, DPO {pa['dpo']} jours")
 print(f"json bytes        {(out / 'books.json').stat().st_size:>12,}")

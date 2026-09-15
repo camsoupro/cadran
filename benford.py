@@ -26,8 +26,8 @@ EXPECTED_2 = {
 }
 
 # Seuils de Nigrini sur l'ecart absolu moyen, premier chiffre
-MAD_1 = [(0.006, "conformite etroite"), (0.012, "conformite acceptable"),
-         (0.015, "conformite marginale"), (9, "non conformite")]
+MAD_1 = [(0.006, "conformité étroite"), (0.012, "conformité acceptable"),
+         (0.015, "conformité marginale"), (9, "non conformité")]
 # Khi deux critique a 5 %, 8 degres de liberte pour le premier chiffre, 9 pour le second
 CHI2_CRIT = {8: 15.507, 9: 16.919}
 
@@ -58,7 +58,7 @@ def mad_verdict(mad: float) -> str:
     for limit, label in MAD_1:
         if mad < limit:
             return label
-    return "non conformite"
+    return "non conformité"
 
 
 def analyse(values: list[float], title: str, digit: str = "first") -> dict:
@@ -79,12 +79,12 @@ def analyse(values: list[float], title: str, digit: str = "first") -> dict:
     mad /= len(expected)
     df = 8 if digit == "first" else 9
     print(f"\n{title}  ({n:,} montants)")
-    print("  chiffre   observe      attendu      ecart")
+    print("  chiffre   observé      attendu      écart")
     for d, obs, pct, exp_pct in rows:
         bar = "#" * int(round(pct / 1.2))
         print(f"    {d}     {pct:6.2f} %     {exp_pct:6.2f} %   {pct - exp_pct:+6.2f}  {bar}")
-    print(f"  khi deux {chi2:8.2f}   (critique a 5 % : {CHI2_CRIT[df]})  "
-          f"{'conforme' if chi2 < CHI2_CRIT[df] else 'ecart significatif'}")
+    print(f"  khi deux {chi2:8.2f}   (critique à 5 % : {CHI2_CRIT[df]})  "
+          f"{'conforme' if chi2 < CHI2_CRIT[df] else 'écart significatif'}")
     print(f"  MAD      {mad:8.5f}   {mad_verdict(mad)}")
     return {"n": n, "chi2": round(chi2, 2), "mad": round(mad, 5),
             "verdict": mad_verdict(mad), "rows": rows}
@@ -97,14 +97,14 @@ amounts = [l["debit"] or l["credit"] for l in lines]
 amounts = [a for a in amounts if a > 0]
 
 print("=" * 72)
-print("TEST DE BENFORD, LIVRES DE LA BRULERIE DU CADRAN")
+print("TEST DE BENFORD, LIVRES DE LA BRÛLERIE DU CADRAN")
 print("=" * 72)
-print(f"{len(books['entries']):,} ecritures, {len(lines):,} lignes, "
-      f"montants de {min(amounts):,.2f} a {max(amounts):,.2f} EUR")
+print(f"{len(books['entries']):,} écritures, {len(lines):,} lignes, "
+      f"montants de {min(amounts):,.2f} à {max(amounts):,.2f} EUR")
 
 out = {}
 out["toutes_lignes"] = analyse(amounts, "Premier chiffre, toutes les lignes du journal")
-out["second"] = analyse(amounts, "Deuxieme chiffre, toutes les lignes du journal", "second")
+out["second"] = analyse(amounts, "Deuxième chiffre, toutes les lignes du journal", "second")
 
 # les ecritures repetitives (loyer, assurance, paie) faussent la population :
 # un auditeur regarde aussi les montants distincts
@@ -128,10 +128,10 @@ print("LECTURE")
 print("=" * 72)
 print("""
 La loi de Benford suppose des montants qui couvrent plusieurs ordres de grandeur
-et qui naissent de processus multiplicatifs. Un journal complet remplit en general
-cette condition : il melange des ventes de 40 EUR et des immobilisations de 146 000.
+et qui naissent de processus multiplicatifs. Un journal complet remplit en général
+cette condition : il mélange des ventes de 40 EUR et des immobilisations de 146 000.
 
-Une population etroite ne la remplit pas. Des ventes de detail toutes comprises
+Une population étroite ne la remplit pas. Des ventes de détail toutes comprises
 entre 300 et 450 EUR commenceront presque toutes par 3 ou 4, et Benford les
 rejettera sans qu'il y ait la moindre anomalie. C'est une limite du test, pas une
 fraude : il se lit en connaissant la population.
