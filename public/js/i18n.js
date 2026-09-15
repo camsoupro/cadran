@@ -51,6 +51,8 @@ export const STR = {
     "The other half of the picture. Receivables say what is owed to us; this page says what we owe, to whom, and by when. A supplier grants terms too, and cash is managed with both columns in sight."],
   payTotal: ["Dettes fournisseurs", "Supplier debts"],
   payNext30: ["À payer sous 30 jours", "Due within 30 days"],
+  payOpenCount: ["{n} factures encore ouvertes", "{n} invoices still open"],
+  payNext30Note: ["sur les échéances d'octobre", "falling due in October"],
   payDpo: ["Délai moyen de paiement", "Average days to pay"],
   payDpoNote: ["sur les {n} factures déjà réglées", "over the {n} invoices already settled"],
   payBalance: ["L'équilibre des délais", "The balance of terms"],

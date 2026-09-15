@@ -1154,8 +1154,8 @@ function payables(D) {
   const gap = Math.round((r.dso - pa.dpo) * 10) / 10;
 
   const figs = h("div", { class: "figs" },
-    figure(t("payTotal"), money(pa.total, { compact: true }), pa.count + " " + t("cInvoice").toLowerCase()),
-    figure(t("payNext30"), money(pa.next30, { compact: true }), t("payNext30")),
+    figure(t("payTotal"), money(pa.total, { compact: true }), t("payOpenCount", { n: num(pa.count, 0) })),
+    figure(t("payNext30"), money(pa.next30, { compact: true }), t("payNext30Note")),
     figure(t("payDpo"), num(pa.dpo, 1) + " " + pick("jours", "days"),
       t("payDpoNote", { n: num(pa.paid_count, 0) })),
     figure(t("recDso"), num(r.dso, 1) + " " + pick("jours", "days"),
