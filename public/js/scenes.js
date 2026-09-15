@@ -129,6 +129,7 @@ export async function mountBalance(host, labels) {
     });
   };
   tickers.add(tick);
+  tick();                       // one frame straight away, in case rAF is throttled
 
   return () => {
     tickers.delete(tick); painters.delete(paint); io.disconnect();
@@ -264,6 +265,7 @@ export async function mountCentres(host, centres, fmt) {
     }
   };
   tickers.add(tick);
+  seen = true; tick();          // one frame straight away, in case rAF is throttled
 
   return () => {
     tickers.delete(tick); painters.delete(paint); io.disconnect(); clearTimeout(growTimer);

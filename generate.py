@@ -322,6 +322,12 @@ def roast(day: date, target_kg: float) -> None:
     standard_value = r2(roasted_kg * STD_COST)
     actual_cost = r2(green_cost + pack_cost + roasted_kg * STD_CONVERSION)
     variance = r2(actual_cost - standard_value)          # positive: costlier than standard
+    # split it the way a cost accountant would: quantity first, then price
+    green_allowed = roasted_kg / STD_YIELD               # green the standard allows for this output
+    var_qty = r2((green_kg - green_allowed) * STD_GREEN_PRICE)
+    var_price = r2(green_cost - green_kg * STD_GREEN_PRICE)
+    # the published standard cost is rounded to the cent, which leaves a few centimes a batch
+    var_round = r2(variance - var_qty - var_price)
 
     ref = f"TOR-{batch_no:03d}"
     B.post(day, "ST", f"Sortie de cafe vert, brassin {ref}, {green_kg:.0f} kg",
@@ -347,7 +353,9 @@ def roast(day: date, target_kg: float) -> None:
                     "roasted_kg": roasted_kg, "yield": round(actual_yield, 4),
                     "std_yield": STD_YIELD, "green_cost": green_cost,
                     "std_value": standard_value, "actual_cost": actual_cost,
-                    "variance": variance, "lots": used})
+                    "variance": variance, "var_qty": var_qty, "var_price": var_price,
+                    "var_round": var_round,
+                    "green_allowed": r2(green_allowed), "lots": used})
 
 
 def sell(day: date, centre: str, kg: float, counter: float = 0.0) -> None:
@@ -739,8 +747,15 @@ def build() -> dict:
     total_green = r2(sum(b["green_kg"] for b in batches))
     total_roasted = r2(sum(b["roasted_kg"] for b in batches))
     real_yield = round(total_roasted / total_green, 4)
+    green_allowed = r2(total_roasted / STD_YIELD)
+    excess_green = r2(total_green - green_allowed)
     lost_kg = r2(total_green * (STD_YIELD - real_yield))
     variance_total = r2(sum(b["variance"] for b in batches))
+    variance_qty = r2(sum(b["var_qty"] for b in batches))
+    variance_price = r2(sum(b["var_price"] for b in batches))
+    variance_round = r2(sum(b["var_round"] for b in batches))
+    avg_green_price = r2(sum(b["green_cost"] for b in batches) / total_green)
+    assert abs(variance_qty + variance_price + variance_round - variance_total) < 1.0,         "variance split does not tie"
 
     # receivables ageing
     ageing = {"current": 0.0, "d30": 0.0, "d60": 0.0, "d90": 0.0, "over": 0.0}
@@ -798,6 +813,10 @@ def build() -> dict:
             "green_kg": total_green, "roasted_kg": total_roasted,
             "yield": real_yield, "std_yield": STD_YIELD,
             "lost_kg": lost_kg, "variance": variance_total,
+            "variance_qty": variance_qty, "variance_price": variance_price,
+            "variance_round": variance_round,
+            "green_allowed": green_allowed, "excess_green": excess_green,
+            "avg_green_price": avg_green_price,
             "std_cost": STD_COST, "std_green": STD_GREEN_PRICE,
             "std_packaging": STD_PACKAGING, "std_conversion": STD_CONVERSION,
         },

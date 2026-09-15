@@ -60,8 +60,8 @@ export const STR = {
 
   ovFinding: ["Le point qui décide de l'année", "The one figure that decides the year"],
   ovFindingText: [
-    "L'atelier a perdu {lost} kg de café de plus que le standard en torréfiant : un rendement réel de {real} % contre {std} % retenu dans le coût standard. Cet écart a coûté {cost}, soit plus de deux fois la perte de l'exercice. Le levier n'est pas commercial, il est dans le tambour du torréfacteur.",
-    "The workshop lost {lost} kg more coffee than standard while roasting: a real yield of {real} % against the {std} % built into the standard cost. That gap cost {cost}, more than twice the loss for the period. The lever is not commercial, it is inside the roaster."],
+    "L'atelier a consommé {excess} kg de café vert de plus que le standard n'autorise pour cette production : un rendement réel de {real} % contre {std} % retenu dans le coût standard. Cet écart de quantité coûte {qty}. À côté, le café vert a été payé {avg} le kilo au lieu de {stdp} : cet écart de prix coûte {price}. Les deux réunis valent plus de deux fois la perte de l'exercice, et aucun des deux n'est un problème commercial.",
+    "The workshop used {excess} kg of green coffee more than the standard allows for this output: a real yield of {real} % against the {std} % built into the standard cost. That quantity variance costs {qty}. Alongside it, green coffee was paid {avg} a kilo instead of {stdp}: that price variance costs {price}. Together they are worth more than twice the loss for the period, and neither of them is a commercial problem."],
   ovSeeProduction: ["Voir le détail par brassin", "See it batch by batch"],
 
   ovMonths: ["Neuf mois", "Nine months"],
@@ -232,6 +232,19 @@ export const STR = {
   prStdValue: ["Valeur standard", "Standard value"],
   prActual: ["Coût réel", "Actual cost"],
   prGap: ["Écart", "Variance"],
+  prSplit: ["D'où vient l'écart", "Where the variance comes from"],
+  prVarQty: ["Écart sur quantité, le rendement", "Quantity variance, the yield"],
+  prVarQtyNote: ["{excess} kg de vert au-delà du standard, au prix standard",
+    "{excess} kg of green beyond standard, at the standard price"],
+  prVarPrice: ["Écart sur prix d'achat", "Purchase price variance"],
+  prVarPriceNote: ["{avg} le kilo payé contre {stdp} au standard",
+    "{avg} a kilo paid against {stdp} at standard"],
+  prVarRound: ["Arrondi du coût standard publié", "Rounding of the published standard cost"],
+  prVarTotal: ["Écart total sur matières", "Total material variance"],
+  prAllowed: ["Vert autorisé par le standard", "Green allowed by the standard"],
+  prExcess: ["Vert consommé en trop", "Green used in excess"],
+  prVsLoss: ["à comparer à la perte de l'exercice, {loss}",
+    "set against the loss for the period, {loss}"],
 
   // ---------------------------------------------------------------- inventory
   invTitle: ["Stocks", "Inventory"],
@@ -337,11 +350,11 @@ export const STR = {
     "Why a cost decided in advance? Because you cannot wait for the end of the month to know whether a kilo sold at {price} makes money. The standard gives an immediate reference, and the gap with the real cost becomes management information in itself."],
   tu6t: ["L'écart qui décide de l'exercice", "The variance that decides the year"],
   tu6a: [
-    "Le standard retient {std} % de rendement. Le réel est de {real} %. Sur {green} kg de café vert, l'écart représente {lost} kg de café torréfié qui n'existent pas, soit {cost}.",
-    "The standard assumes a {std} % yield. The real one is {real} %. On {green} kg of green coffee, the gap is {lost} kg of roasted coffee that do not exist, that is {cost}."],
+    "Le coût standard retient {std} % de rendement. Le réel est de {real} %. Pour {roasted} kg de café torréfié, le standard autorisait {allowed} kg de vert ; l'atelier en a consommé {used} kg. Les {excess} kg de trop, valorisés au prix standard, sont l'<b>écart sur quantité</b> : {qty}.",
+    "The standard assumes a {std} % yield. The real one is {real} %. For {roasted} kg of roasted coffee the standard allowed {allowed} kg of green; the workshop used {used} kg. The {excess} kg too many, valued at the standard price, are the <b>quantity variance</b>: {qty}."],
   tu6b: [
-    "La perte de l'exercice est de {loss}. Autrement dit : sans cet écart, l'entreprise serait bénéficiaire. Une comptabilité qui s'arrête au résultat ne dit pas cela. Une comptabilité analytique, si.",
-    "The loss for the period is {loss}. In other words: without that variance the company would be profitable. Bookkeeping that stops at the result does not tell you this. Cost accounting does."],
+    "Le café vert a par ailleurs été payé {avg} le kilo au lieu des {stdp} du standard : c'est l'<b>écart sur prix</b>, {price}. Additionnés, ces deux écarts valent {total}, quand la perte de l'exercice n'est que de {loss}. Un compte de résultat seul ne dit pas cela : il montre la perte, pas ses deux causes.",
+    "Green coffee was also paid {avg} a kilo instead of the {stdp} in the standard: that is the <b>price variance</b>, {price}. Added together the two variances are worth {total}, when the loss for the period is only {loss}. An income statement alone does not tell you this: it shows the loss, not its two causes."],
   tu7t: ["Les états financiers", "The statements"],
   tu7a: [
     "Le compte de résultat additionne les classes 6 et 7 : il répond à la question « a-t-on gagné de l'argent ». Le bilan photographie les classes 1 à 5 au dernier jour : il répond à « que possède-t-on, et à qui ».",

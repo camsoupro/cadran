@@ -99,10 +99,13 @@ async function overview(D, go) {
 
   const finding = h("section", { class: "reveal" },
     callout(t("ovFinding"), t("ovFindingText", {
-      lost: num(p.lost_kg, 0),
+      excess: num(p.excess_green, 0),
       real: num(p.yield * 100, 1),
       std: num(p.std_yield * 100, 0),
-      cost: money(p.variance),
+      qty: money(p.variance_qty),
+      price: money(p.variance_price),
+      avg: money(p.avg_green_price),
+      stdp: money(p.std_green),
     })),
     h("p", { style: { marginTop: "16px" } },
       h("a", { href: "#/production", class: "btn primary", text: t("ovSeeProduction") })));
@@ -440,7 +443,7 @@ async function centres(D) {
 // ============================================================== production
 
 function production(D) {
-  const p = D.production;
+  const p = D.production, i = D.income_statement;
   const stdRows = [
     { label: t("prGreenStd") + ` (${num(p.std_green)} / ${num(p.std_yield, 2)})`, value: p.std_green / p.std_yield },
     { label: t("prPack"), value: p.std_packaging },
@@ -453,12 +456,28 @@ function production(D) {
     foot: h("tr", {}, h("td", { text: t("prStdCost") }), h("td", { class: "n", text: num(p.std_cost) })),
   });
 
+  const splitRows = [
+    { label: t("prVarQty"), note: t("prVarQtyNote", { excess: num(p.excess_green, 0) }), value: p.variance_qty },
+    { label: t("prVarPrice"), note: t("prVarPriceNote", { avg: money(p.avg_green_price), stdp: money(p.std_green) }), value: p.variance_price },
+    { label: t("prVarRound"), note: "", value: p.variance_round },
+  ];
+  const splitTable = table([
+    { label: "", render: r => h("span", {}, r.label, r.note ? h("small", { text: r.note }) : null) },
+    { label: t("cAmount"), n: true, cls: r => r.value > 0 ? "neg" : "pos", render: r => num(r.value) },
+  ], splitRows, {
+    foot: h("tr", {}, h("td", { text: t("prVarTotal") }),
+      h("td", { class: "n neg", text: num(p.variance) })),
+  });
+
   const stats = h("div", { class: "figs" },
-    figure(t("prYield"), num(p.yield * 100, 1) + " %", t("prYieldStd") + " " + num(p.std_yield * 100, 0) + " %",
-      p.yield < p.std_yield ? "neg" : "pos"),
-    figure(t("prGreenUsed"), kg(p.green_kg), t("prBatches", { n: num(p.batch_count, 0) })),
-    figure(t("prRoasted"), kg(p.roasted_kg), t("prStdCost") + " " + num(p.std_cost)),
-    figure(t("prLost"), kg(p.lost_kg), t("prVariance") + " " + money(p.variance), "neg"));
+    figure(t("prYield"), num(p.yield * 100, 1) + " %",
+      t("prYieldStd") + " " + num(p.std_yield * 100, 0) + " %", p.yield < p.std_yield ? "neg" : "pos"),
+    figure(t("prGreenUsed"), kg(p.green_kg),
+      t("prAllowed") + " " + kg(p.green_allowed)),
+    figure(t("prExcess"), kg(p.excess_green),
+      t("prBatches", { n: num(p.batch_count, 0) })),
+    figure(t("prVarTotal"), money(p.variance),
+      t("prVsLoss", { loss: money(Math.abs(i.net)) }), "neg"));
 
   const batches = p.batches.slice().reverse();
   const bTable = table([
@@ -468,8 +487,8 @@ function production(D) {
     { label: t("prRoastedKg"), n: true, render: b => num(b.roasted_kg, 1) },
     { label: t("prYield"), n: true, cls: b => b.yield < b.std_yield ? "neg" : "pos", render: b => num(b.yield * 100, 1) + " %" },
     { label: t("prStdValue"), n: true, render: b => num(b.std_value) },
-    { label: t("prActual"), n: true, render: b => num(b.actual_cost) },
-    { label: t("prGap"), n: true, cls: b => b.variance > 0 ? "neg" : "pos", render: b => num(b.variance) },
+    { label: t("prVarQty"), n: true, cls: b => b.var_qty > 0 ? "neg" : "pos", render: b => num(b.var_qty) },
+    { label: t("prVarPrice"), n: true, cls: b => b.var_price > 0 ? "neg" : "pos", render: b => num(b.var_price) },
   ], batches);
 
   return {
@@ -478,10 +497,13 @@ function production(D) {
         reading(t("prRead", { std: num(p.std_yield * 100, 0) })),
         stats,
         h("div", { class: "two", style: { marginTop: "30px" } },
-          h("div", {}, h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("prStdCost") }), stdTable),
+          h("div", {},
+            h("p", { class: "caps", style: { marginBottom: "10px" }, text: t("prStdCost") }), stdTable,
+            h("p", { class: "caps", style: { margin: "26px 0 10px" }, text: t("prSplit") }), splitTable),
           h("div", {}, callout(t("ovFinding"), t("ovFindingText", {
-            lost: num(p.lost_kg, 0), real: num(p.yield * 100, 1),
-            std: num(p.std_yield * 100, 0), cost: money(p.variance),
+            excess: num(p.excess_green, 0), real: num(p.yield * 100, 1),
+            std: num(p.std_yield * 100, 0), qty: money(p.variance_qty),
+            price: money(p.variance_price), avg: money(p.avg_green_price), stdp: money(p.std_green),
           })))),
         h("p", { class: "caps", style: { margin: "34px 0 10px" }, text: t("prTable") }),
         bTable)),
@@ -779,9 +801,14 @@ function tutorial(D, go) {
     step(6, t("tu6t"), [
       t("tu6a", {
         std: num(p.std_yield * 100, 0), real: num(p.yield * 100, 1),
-        green: num(p.green_kg, 0), lost: num(p.lost_kg, 0), cost: money(p.variance),
+        roasted: num(p.roasted_kg, 0), allowed: num(p.green_allowed, 0),
+        used: num(p.green_kg, 0), excess: num(p.excess_green, 0), qty: money(p.variance_qty),
       }),
-      t("tu6b", { loss: money(Math.abs(i.net)) }),
+      t("tu6b", {
+        avg: money(p.avg_green_price), stdp: money(p.std_green),
+        price: money(p.variance_price), total: money(p.variance),
+        loss: money(Math.abs(i.net)),
+      }),
     ]),
     step(7, t("tu7t"), [t("tu7a"), t("tu7b")]),
     step(8, t("tu8t"), [t("tu8a"), t("tu8b", { lines: num(m.lines, 0) })]));
