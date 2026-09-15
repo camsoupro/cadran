@@ -653,7 +653,8 @@ function invoiceSheet(D, inv, go) {
 function invoices(D, go) {
   const root = h("div", {});
   const detail = h("div", { style: { marginBottom: "26px" } });
-  const rows = D.invoices.slice().reverse();
+  const rows = (D.invoices || []).slice().reverse();
+  if (!rows.length) return { node: section(t("invTitleFac"), null, h("p", { class: "muted", text: "-" })) };
 
   const list = table([
     { label: t("cInvoice"), c: true, render: i2 => i2.ref },

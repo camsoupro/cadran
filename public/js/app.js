@@ -24,10 +24,10 @@ const NAV = [
   ["navManagement", [["centres", "pCentres", d => String(d.centres.length)],
     ["production", "pProduction", d => num(d.production.batch_count, 0)],
     ["inventory", "pInventory"],
-    ["invoices", "pInvoices", d => num(d.invoices.length, 0)],
+    ["invoices", "pInvoices", d => num((d.invoices || []).length, 0)],
     ["receivables", "pReceivables"],
     ["reminders", "pReminders", d => {
-      const n = d.receivables.open.filter(o => o.late > 0).length;
+      const n = (d.receivables.open || []).filter(o => o.late > 0).length;
       return n ? String(n) : "";
     }]]],
   ["navStatements", [["income", "pIncome"], ["balance", "pBalance"], ["exports", "pExports"]]],
@@ -113,7 +113,14 @@ async function render() {
   const app = h("div", { class: "app" }, buildRail(), main);
   document.body.replaceChildren(app);
 
-  const out = await page.render(D, go);
+  let out;
+  try {
+    out = await page.render(D, go);
+  } catch (err) {
+    console.error(err);
+    out = { node: h("section", {}, h("p", { class: "reading" },
+      "Cette page n'a pas pu s'afficher. / This page could not be rendered. " + err.message)) };
+  }
   main.append(out.node, footer());
   cleanup = out.cleanup || null;
   revealAll(main);
