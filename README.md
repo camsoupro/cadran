@@ -61,4 +61,11 @@ payment interest at the ECB rate plus ten points, the 40 EUR recovery charge, th
 and the FEC format all follow French practice. Public holidays are observed: the workshop does
 not roast on 1 January or 14 July.
 
-Designed and built by Camilla Bouyahia.
+## Authorship
+
+Specified, directed and reviewed by **Camilla Bouyahia**. The scope, the accounting rules to be
+covered, the economic conclusions and every review decision are hers. The code was written with
+Claude (Anthropic) under her direction, including the request to test the generated figures
+against Benford's law, which the first version failed.
+
+Copyright 2026 Camilla Bouyahia. Published as a portfolio piece, not as a product.
