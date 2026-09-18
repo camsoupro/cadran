@@ -68,4 +68,17 @@ covered, the economic conclusions and every review decision are hers. The code w
 Claude (Anthropic) under her direction, including the request to test the generated figures
 against Benford's law, which the first version failed.
 
-Copyright 2026 Camilla Bouyahia. Published as a portfolio piece, not as a product.
+## License
+
+Copyright (C) 2026 Camilla Bouyahia. Released under the **GNU Affero General Public License,
+version 3** (see `LICENSE`).
+
+In plain words: you may read this code, clone it, learn from it and build on it. If you run a
+modified version as a service over a network, section 13 requires you to offer your users the
+corresponding source of your version. That keeps the work open and stops it being folded into a
+closed product.
+
+As sole copyright holder I remain free to grant a separate commercial licence. For that reason
+outside contributions are not merged without a written assignment.
+
+Published as a portfolio piece, not as a product. The company and its figures are fictional.
