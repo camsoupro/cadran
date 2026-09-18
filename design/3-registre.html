@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="fr" data-dir="registre">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="darkreader-lock">
+<title>Direction 3, Registre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---------------------------------------------------------------------------
+   DIRECTION 3, REGISTRE
+   Le fond reste doux pour les yeux, mais froid et desature : de l'os, pas de la creme.
+   Space Grotesk pour tout ce qui structure, une serif basse en contraste uniquement
+   pour la prose qu'on lit vraiment. Aucune serif sur un chiffre ni sur le logo.
+   3D : une masse sculpturale, matiere argile, lumiere douce, mouvement lent.
+   --------------------------------------------------------------------------- */
+:root{
+  --bg:#F2F1EE; --card:#FAFAF8; --sunk:#E9E8E4;
+  --ink:#16181A; --ink-2:#55585C; --ink-3:#8D9195;
+  --line:#E0DFDA; --line-2:#EBEAE6;
+  --accent:#2E4A3F; --accent-soft:rgba(46,74,63,.07);
+  --pos:#2E6B4F; --neg:#B23C2A; --warn:#94690F;
+  --shadow:0 20px 40px -32px rgba(22,24,26,.5);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Space Grotesk",system-ui,sans-serif; font-size:14px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; padding:0 0 90px;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:0 28px}
+.read{font-family:"Newsreader",Georgia,serif; font-size:17px; line-height:1.68; color:var(--ink-2)}
+
+/* ---------- barre ---------- */
+header.bar{border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex; align-items:center; gap:16px; height:64px}
+.logo{display:flex; align-items:center; gap:10px}
+.name{
+  font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:18px;
+  letter-spacing:-.02em;
+}
+.tag{font-size:12px; color:var(--ink-3)}
+.bar nav{margin-left:auto; display:flex; gap:22px}
+.bar nav a{
+  text-decoration:none; color:var(--ink-3); font-size:13px; font-weight:500;
+  padding:3px 0; border-bottom:1.5px solid transparent;
+}
+.bar nav a.on{color:var(--ink); border-bottom-color:var(--accent)}
+
+/* ---------- ouverture ---------- */
+.hero{display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center;
+  padding:56px 0 46px}
+h1{
+  font-family:"Space Grotesk",sans-serif; font-weight:500;
+  font-size:clamp(34px,4.6vw,54px); line-height:1.02; letter-spacing:-.035em;
+  margin:0 0 20px;
+}
+h1 .big{
+  display:block; font-variant-numeric:tabular-nums lining-nums;
+  font-weight:600; letter-spacing:-.045em;
+}
+.hero .read{max-width:46ch; margin:0}
+.scene{height:380px; position:relative}
+.scene canvas{display:block; width:100%; height:100%}
+.caption{
+  position:absolute; left:0; bottom:-6px; font-size:11.5px; color:var(--ink-3);
+  display:flex; align-items:center; gap:10px;
+}
+.caption b{font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:500;
+  color:var(--ink); font-variant-numeric:tabular-nums}
+button.ghost{
+  font:inherit; font-family:"Space Grotesk",sans-serif; font-size:12px; font-weight:500;
+  cursor:pointer; background:transparent; color:var(--ink-2);
+  border:1px solid var(--line); border-radius:99px; padding:5px 13px;
+}
+button.ghost:hover{border-color:var(--ink-2); color:var(--ink)}
+
+/* ---------- chiffres, en ligne de crete ---------- */
+.rule{border-top:1px solid var(--line); padding-top:0}
+.figs{display:grid; grid-template-columns:repeat(4,1fr)}
+.fig{padding:26px 26px 28px 0}
+.fig + .fig{padding-left:26px; border-left:1px solid var(--line)}
+.fig .k{font-size:12px; color:var(--ink-3); margin:0 0 14px; font-weight:500}
+.fig .v{
+  font-family:"Space Grotesk",sans-serif; font-weight:500; font-size:30px;
+  line-height:1; letter-spacing:-.04em; font-variant-numeric:tabular-nums lining-nums;
+}
+.fig .v.pos{color:var(--pos)} .fig .v.neg{color:var(--neg)}
+.fig .n{font-size:12px; color:var(--ink-3); margin:10px 0 0; line-height:1.5}
+
+/* ---------- tableau ---------- */
+section{padding-top:44px}
+h2{
+  font-family:"Space Grotesk",sans-serif; font-weight:500; font-size:19px;
+  letter-spacing:-.022em; margin:0 0 4px;
+}
+.sub{font-size:13px; color:var(--ink-3); margin:0 0 20px}
+.panel{background:var(--card); border:1px solid var(--line); border-radius:14px;
+  overflow:hidden; box-shadow:var(--shadow)}
+table{width:100%; border-collapse:collapse}
+th{
+  text-align:left; font-size:11.5px; font-weight:500; color:var(--ink-3);
+  padding:13px 22px; border-bottom:1px solid var(--line);
+}
+th.n,td.n{text-align:right; font-variant-numeric:tabular-nums}
+td{padding:13px 22px; border-bottom:1px solid var(--line-2); font-size:13.5px}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--sunk)}
+td.n{font-family:"JetBrains Mono",monospace; font-size:12.5px}
+.code{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-3); margin-left:8px}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+
+.note{
+  margin:28px 0 0; padding:20px 24px; border-radius:14px; background:var(--accent-soft);
+  border:1px solid rgba(46,74,63,.13); font-size:13.5px; color:var(--ink-2);
+}
+.note b{color:var(--ink); font-weight:500}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr; gap:20px; padding:36px 0}
+  .scene{height:300px}
+  .figs{grid-template-columns:repeat(2,1fr)}
+  .fig{padding:22px 16px 22px 0}
+  .fig + .fig{padding-left:16px}
+  .fig:nth-child(3){border-left:0; padding-left:0}
+  .fig:nth-child(3),.fig:nth-child(4){border-top:1px solid var(--line)}
+  .bar nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+  <span class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="#16181A" stroke-width="1.5"/>
+      <path d="M12 12L16.5 8.2" stroke="#2E4A3F" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="12" r="1.6" fill="#16181A"/>
+    </svg>
+    <span class="name">Cadran</span>
+  </span>
+  <span class="tag">Exercice 2026, arrêté au 30 septembre</span>
+  <nav>
+    <a href="#" class="on">Vue d'ensemble</a><a href="#">Journal</a><a href="#">Bilan</a>
+    <a href="#">Échéancier</a><a href="#">En clair</a>
+  </nav>
+</div></header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div>
+      <h1>L'année est positive de
+        <span class="big">12 771 €.</span>
+      </h1>
+      <p class="read">C'est peu sur 704 449 € de chiffre d'affaires, et c'est déjà net d'une
+        dépréciation de 15 866 € sur un client qui ne règle plus depuis mai. Si un deuxième
+        faisait pareil, l'exercice deviendrait négatif.</p>
+    </div>
+    <div class="scene" id="scene">
+      <div class="caption">
+        <span>Écart actif passif</span><b id="gap">0,00 €</b>
+        <button class="ghost" id="perturb">Déséquilibrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="figs">
+    <div class="fig">
+      <p class="k">Chiffre d'affaires</p>
+      <div class="v">704 449 €</div>
+      <p class="n">sur neuf mois, 3 654 écritures</p>
+    </div>
+    <div class="fig">
+      <p class="k">Trésorerie</p>
+      <div class="v">157 264 €</div>
+      <p class="n">banque et caisse au 30 septembre</p>
+    </div>
+    <div class="fig">
+      <p class="k">Créances clients</p>
+      <div class="v">99 019 €</div>
+      <p class="n">payées en 49,3 jours, quand nous payons en 43,7</p>
+    </div>
+    <div class="fig">
+      <p class="k">Point de bascule</p>
+      <div class="v neg">1 client</div>
+      <p class="n">le grossiste, 41 766 € d'encours</p>
+    </div>
+  </div>
+
+  <section>
+    <h2>Résultat par centre</h2>
+    <p class="sub">Six centres analytiques, dont le total retombe exactement sur le résultat.</p>
+    <div class="panel">
+      <table>
+        <thead><tr>
+          <th>Centre</th><th>Type</th><th class="n">Produits</th><th class="n">Charges</th><th class="n">Résultat</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Atelier de torréfaction<span class="code">TOR</span></td><td>Coût</td>
+              <td class="n">0</td><td class="n">311 482</td><td class="n neg">-311 482</td></tr>
+          <tr><td>Ventes aux professionnels<span class="code">GRO</span></td><td>Profit</td>
+              <td class="n">331 866</td><td class="n">108 551</td><td class="n pos">223 315</td></tr>
+          <tr><td>Boutique du Cadran<span class="code">BTQ</span></td><td>Profit</td>
+              <td class="n">288 140</td><td class="n">173 204</td><td class="n pos">114 936</td></tr>
+          <tr><td>Boutique en ligne<span class="code">WEB</span></td><td>Profit</td>
+              <td class="n">84 443</td><td class="n">46 902</td><td class="n pos">37 541</td></tr>
+          <tr><td>Marketing<span class="code">MKT</span></td><td>Soutien</td>
+              <td class="n">0</td><td class="n">22 611</td><td class="n neg">-22 611</td></tr>
+          <tr><td>Administration<span class="code">ADM</span></td><td>Soutien</td>
+              <td class="n">0</td><td class="n">28 928</td><td class="n neg">-28 928</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note"><b>Ce que fait la 3D ici.</b> Une masse unique, en matière mate, éclairée
+    par une seule source douce. Les deux blocs sont l'actif et le passif : ils reposent l'un sur
+    l'autre exactement parce que le bilan s'équilibre. Un écart les décale, et ils reviennent
+    lentement. Un seul moment de 3D sur la page, grand, calme, jamais en boucle rapide.</p>
+  </section>
+
+</div>
+
+<script type="module">
+import * as T from "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
+
+const host = document.getElementById("scene");
+const gapOut = document.getElementById("gap");
+const scene = new T.Scene();
+const cam = new T.PerspectiveCamera(30, 1, .1, 100);
+cam.position.set(2.6, 2.4, 11); cam.lookAt(0, -.15, 0);
+
+const gl = new T.WebGLRenderer({ antialias: true, alpha: true });
+gl.setPixelRatio(Math.min(devicePixelRatio, 2));
+gl.shadowMap.enabled = true; gl.shadowMap.type = T.PCFSoftShadowMap;
+host.appendChild(gl.domElement);
+
+scene.add(new T.HemisphereLight(0xffffff, 0xd6d4cd, 1.15));
+const key = new T.DirectionalLight(0xffffff, 1.6);
+key.position.set(4, 8, 6); key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 7;
+key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
+key.shadow.camera.left = -7; key.shadow.camera.right = 7;
+scene.add(key);
+
+const floor = new T.Mesh(new T.PlaneGeometry(50, 50), new T.ShadowMaterial({ opacity: .12 }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -2.3; floor.receiveShadow = true;
+scene.add(floor);
+
+// argile : rugosite haute, zero metal, une pointe de couleur
+const clay = c => new T.MeshStandardMaterial({ color: c, roughness: .95, metalness: 0 });
+const rig = new T.Group(); scene.add(rig);
+
+// un bloc aux aretes adoucies, sans librairie : une boite subdivisee et lissee aux coins
+function slab(w, h, d, color) {
+  const g = new T.BoxGeometry(w, h, d, 6, 4, 6);
+  const p = g.attributes.position;
+  const v = new T.Vector3();
+  const r = Math.min(w, h, d) * .22;
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i);
+    const cx = Math.max(Math.abs(v.x) - (w / 2 - r), 0) * Math.sign(v.x);
+    const cy = Math.max(Math.abs(v.y) - (h / 2 - r), 0) * Math.sign(v.y);
+    const cz = Math.max(Math.abs(v.z) - (d / 2 - r), 0) * Math.sign(v.z);
+    const len = Math.hypot(cx, cy, cz);
+    if (len > 0) {
+      const s = r / len;
+      v.set(Math.sign(v.x) * Math.min(Math.abs(v.x), w / 2 - r) + cx * s,
+            Math.sign(v.y) * Math.min(Math.abs(v.y), h / 2 - r) + cy * s,
+            Math.sign(v.z) * Math.min(Math.abs(v.z), d / 2 - r) + cz * s);
+      p.setXYZ(i, v.x, v.y, v.z);
+    }
+  }
+  g.computeVertexNormals();
+  const m = new T.Mesh(g, clay(color));
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
+const lower = slab(5.4, 1.5, 3.2, 0xd7d4cc);   // le passif, en dessous
+lower.position.y = -1.5; rig.add(lower);
+
+const upper = slab(4.4, 1.25, 2.6, 0x2e4a3f);  // l'actif, pose dessus
+upper.position.y = .05; rig.add(upper);
+
+const cap = slab(2.4, .5, 1.5, 0xbfbcb2);
+cap.position.y = 1.05; rig.add(cap);
+
+let target = 0, off = 0, vel = 0;
+document.getElementById("perturb").addEventListener("click", () => {
+  if (target === 0) {
+    const gap = (Math.random() > .5 ? 1 : -1) * (9000 + Math.random() * 30000);
+    target = gap / 26000;
+    gapOut.textContent = (gap > 0 ? "+" : "") +
+      gap.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+    gapOut.style.color = "var(--neg)";
+  } else {
+    target = 0; gapOut.textContent = "0,00 €"; gapOut.style.color = "";
+  }
+});
+
+const size = () => {
+  const r = host.getBoundingClientRect(); if (!r.width) return;
+  gl.setSize(r.width, r.height, false);
+  cam.aspect = r.width / r.height; cam.updateProjectionMatrix();
+};
+new ResizeObserver(size).observe(host); size();
+
+let last = 0;
+(function loop(t) {
+  requestAnimationFrame(loop);
+  if (t - last < 24) return; last = t;
+  vel += (target - off) * .009; vel *= .915; off += vel;
+  upper.position.x = off; upper.rotation.z = -off * .045;
+  cap.position.x = off * 1.5; cap.rotation.z = -off * .07;
+  rig.rotation.y = Math.sin(t / 7000) * .11;      // lent, presque immobile
+  gl.render(scene, cam);
+})(0);
+</script>
+</body>
+</html>

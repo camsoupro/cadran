@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="darkreader-lock">
+<title>Cadran, trois directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;450&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F4F6;--card:#fff;--ink:#0C0E12;--ink2:#4A5059;--ink3:#878E99;--line:#E2E5EA;--accent:#1B5CF0}
+*{box-sizing:border-box} html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.6 "Inter",system-ui,sans-serif;padding:0 0 70px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+h1{font-family:"Inter Tight",sans-serif;font-weight:600;font-size:clamp(28px,4vw,40px);
+   letter-spacing:-.033em;line-height:1.05;margin:56px 0 14px}
+.lede{font-size:15px;color:var(--ink2);max-width:66ch;margin:0 0 8px}
+.crit{margin:26px 0 40px;padding:18px 22px;background:#fff;border:1px solid var(--line);
+  border-left:2px solid var(--accent);border-radius:10px;font-size:13.5px;color:var(--ink2)}
+.crit b{color:var(--ink);font-weight:500}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(12,14,18,.04),0 14px 30px -20px rgba(12,14,18,.2);
+  transition:transform .18s ease, box-shadow .18s ease}
+a.card:hover{transform:translateY(-3px);box-shadow:0 1px 2px rgba(12,14,18,.05),0 22px 44px -22px rgba(12,14,18,.3)}
+.swatch{height:112px;display:flex;align-items:center;justify-content:center;
+  font-size:30px;letter-spacing:-.03em}
+.s1{background:#F3F4F6;color:#0C0E12;font-family:"Inter Tight",sans-serif;font-weight:600;
+  border-bottom:1px solid var(--line)}
+.s1 i{font-style:normal;color:#1B5CF0}
+.s2{background:#0B0D10;color:#E6EAF0;font-family:"JetBrains Mono",monospace;font-size:24px}
+.s2 i{font-style:normal;color:#4DD4A0}
+.s3{background:#F2F1EE;color:#16181A;font-family:"Inter Tight",sans-serif;font-weight:500;
+  border-bottom:1px solid #E0DFDA}
+.s3 i{font-style:normal;color:#2E4A3F}
+.body{padding:18px 20px 20px}
+.body h2{font-family:"Inter Tight",sans-serif;font-weight:600;font-size:16px;
+  letter-spacing:-.022em;margin:0 0 3px}
+.body .n{font-size:12px;color:var(--ink3);margin:0 0 12px}
+.body p{font-size:13px;color:var(--ink2);margin:0 0 12px}
+dl{margin:0;font-size:12.5px;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}
+dt{color:var(--ink3)} dd{margin:0}
+.how{margin-top:44px;font-size:13.5px;color:var(--ink2)}
+.how b{color:var(--ink);font-weight:500}
+@media(max-width:820px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Trois directions pour Cadran</h1>
+  <p class="lede">Même contenu, mêmes chiffres réels, trois partis pris de typographie et
+  d'animation 3D. Ouvre les trois, regarde-les côte à côte, et dis-moi laquelle.</p>
+
+  <div class="crit"><b>Le diagnostic, d'abord.</b> Ce qui fait « site de vêtements » dans la
+  version actuelle, c'est un ensemble précis : une serif de titrage à fort contraste
+  (Instrument Serif) utilisée pour le logo, les titres <i>et</i> les chiffres ; un fond crème
+  chaud ; un accent cuivre ; des petites capitales très espacées ; des filets partout. C'est
+  exactement le vocabulaire de Sézane ou d'une marque de café de spécialité. Les trois
+  directions ci-dessous abandonnent toutes la serif de titrage, et aucune n'écrit un chiffre
+  avec une serif.</div>
+
+  <div class="cards">
+
+    <a class="card" href="1-instrument.html">
+      <div class="swatch s1">12 771 <i>€</i></div>
+      <div class="body">
+        <h2>1. Instrument</h2>
+        <p class="n">Précision suisse, clair et froid</p>
+        <p>Zéro serif. Le chiffre est le héros, pas le titre. Fond gris froid, un seul bleu
+        qui ne sert qu'à signaler. Densité d'un tableau de bord moderne.</p>
+        <dl>
+          <dt>Titres</dt><dd>Inter Tight</dd>
+          <dt>Texte</dt><dd>Inter</dd>
+          <dt>Chiffres</dt><dd>Inter Tight tabulaire, JetBrains Mono pour les codes</dd>
+          <dt>3D</dt><dd>Volumes pleins et mats, une lumière, ombre de contact, ressort amorti</dd>
+          <dt>Référence</dt><dd>Linear, Stripe, Mercury</dd>
+        </dl>
+      </div>
+    </a>
+
+    <a class="card" href="2-terminal.html">
+      <div class="swatch s2">12 770,62 <i>▲</i></div>
+      <div class="body">
+        <h2>2. Terminal</h2>
+        <p class="n">Sombre d'abord, technique, dense</p>
+        <p>Le monospace aligne les chiffres, c'est sa raison d'être dans un livre comptable.
+        Fond graphite, grille discrète, un vert de signal. Le plus crédible en entretien,
+        le plus austère.</p>
+        <dl>
+          <dt>Titres</dt><dd>IBM Plex Sans</dd>
+          <dt>Texte</dt><dd>IBM Plex Sans</dd>
+          <dt>Chiffres</dt><dd>IBM Plex Mono, partout</dd>
+          <dt>3D</dt><dd>Aiguille de cadran lumineuse sur noir, traînée, stabilisation</dd>
+          <dt>Référence</dt><dd>Bloomberg, outils de développement</dd>
+        </dl>
+      </div>
+    </a>
+
+    <a class="card" href="3-registre.html">
+      <div class="swatch s3">12 771 <i>€</i></div>
+      <div class="body">
+        <h2>3. Registre</h2>
+        <p class="n">Doux pour les yeux, mais froid et moderne</p>
+        <p>Garde un fond non blanc, mais désaturé : de l'os, pas de la crème. Une serif basse
+        en contraste, uniquement pour la prose qu'on lit vraiment, jamais sur un chiffre ni
+        sur le logo. Grand, calme, éditorial.</p>
+        <dl>
+          <dt>Titres</dt><dd>Space Grotesk</dd>
+          <dt>Texte</dt><dd>Newsreader pour la prose, Space Grotesk pour le reste</dd>
+          <dt>Chiffres</dt><dd>Space Grotesk tabulaire, JetBrains Mono dans les tableaux</dd>
+          <dt>3D</dt><dd>Masse sculpturale en argile, lumière douce, mouvement très lent</dd>
+          <dt>Référence</dt><dd>Presse de données, Notion, Arc</dd>
+        </dl>
+      </div>
+    </a>
+
+  </div>
+
+  <p class="how"><b>Ce qu'il faut regarder.</b> Les trois utilisent les vrais chiffres de la
+  démonstration, pour que la comparaison soit honnête. Regarde en particulier : est-ce qu'un
+  chiffre de 30 pixels te paraît lisible et sérieux ; est-ce que le fond fatigue après deux
+  minutes ; et surtout, appuie sur le bouton de chaque scène 3D. <b>Dans les trois, l'objet
+  n'est plus décoratif : sa position est calculée depuis l'écart réel entre l'actif et le
+  passif, et il se stabilise par ressort.</b> Quand le bilan est juste, l'objet est immobile.
+  C'est le vrai changement, plus encore que le style de rendu.</p>
+
+</div>
+</body>
+</html>
